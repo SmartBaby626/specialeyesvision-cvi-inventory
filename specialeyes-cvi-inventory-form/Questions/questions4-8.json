@@ -9,7 +9,7 @@
         "subQuestionText": null
     },
     {
-        "DYC": "FALSE",
+        "DYC": "TRUE",
         "questionNum": 2,
         "questionText": "Have difficulty walking down stairs?",
         "subQuestion": "FALSE",
@@ -18,7 +18,7 @@
         "subQuestionText": null
     },
     {
-        "DYC": "FALSE",
+        "DYC": "TRUE",
         "questionNum": 3,
         "questionText": "Trip at the edges of pavements going up?",
         "subQuestion": "FALSE",
