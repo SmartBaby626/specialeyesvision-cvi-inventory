@@ -2,6 +2,7 @@
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
   import ContinueButton from './lib/ContinueButton.svelte';
+  import BackButton from './lib/BackButton.svelte';
   import { fly } from 'svelte/transition';
 
   let currentPage = 0;
@@ -54,7 +55,7 @@
           <LikertScale class="survey__scale" bind:value={responseQ2} />
 
           <div class="survey__navigation">
-            <button class="survey__button" on:click={prevPage}>Back</button>
+          <BackButton on:click={prevPage}>Back</BackButton>
             <ContinueButton on:click={nextPage}>Next</ContinueButton>
           </div>
 
@@ -67,7 +68,7 @@
           <LikertScale class="survey__scale" bind:value={responseQ4} />
 
           <div class="survey__navigation">
-            <button class="survey__button" on:click={prevPage}>Back</button>
+          <BackButton on:click={prevPage}>Back</BackButton>
             <ContinueButton on:click={nextPage}>Next</ContinueButton>
           </div>
 
@@ -77,8 +78,8 @@
           <LikertScale class="survey__scale" bind:value={responseQ5} />
 
           <div class="survey__navigation">
-            <button class="survey__button" on:click={prevPage}>Back</button>
-            <button class="survey__button" on:click={handleSubmit}>Submit</button>
+          <BackButton on:click={prevPage}>Back</BackButton>
+          <ContinueButton on:click={handleSubmit}>Submit</ContinueButton>
           </div>
         {/if}
       </div>
