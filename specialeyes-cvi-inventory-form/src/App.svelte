@@ -3,7 +3,7 @@
   import RadioButton from './lib/RadioButton.svelte';
   import ContinueButton from './lib/ContinueButton.svelte';
   import BackButton from './lib/BackButton.svelte';
-  import { fly } from 'svelte/transition';
+  import { fly, fade, slide } from 'svelte/transition';
   import questions4_8 from '../Questions/questions4-8.json';
   import questions9_12 from '../Questions/questions9-12.json';
 
@@ -78,14 +78,19 @@
         <div class="survey__page" in:fly={{ x: isForward ? 400 : -400, duration: 400 }} out:fly={{ x: isForward ? -400 : 400, duration: 400 }}>
           {#if currentPage > 0 && currentPage <= questions.length}
             <h2 class="survey__subtitle">Question {questions[currentPage-1].questionNum}</h2>
+            {#if questions[currentPage-1].DYC === 'TRUE'}
+              <div class="survey__question-lead" style="color: #000;">Does your child...</div>
+            {/if}
             <p class="survey__question">{questions[currentPage-1].questionText}</p>
             <LikertScale class="survey__scale" bind:value={answers[currentPage-1].value} />
-            {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
-              <div class="survey__subquestion">
-                <p>{questions[currentPage-1].subQuestionText}</p>
-                {#each questions[currentPage-1].subQuestionOptText.split('/') as opt}
-                  <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
-                {/each}
+            {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
+              <div in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+                <div class="survey__subquestion" in:slide={{ duration: 300 }} out:slide={{ duration: 300 }}>
+                  <p>{questions[currentPage-1].subQuestionText}</p>
+                  {#each questions[currentPage-1].subQuestionOptText.split('/') as opt}
+                    <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
+                  {/each}
+                </div>
               </div>
             {/if}
             <div class="survey__navigation">
@@ -187,6 +192,14 @@
   .survey__subtitle {
     font-size: 1.5rem;
     margin-bottom: 1rem;
+  }
+
+  .survey__question-lead {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+    color: #000;
+    letter-spacing: 0.2px;
   }
 
   .survey__question {
