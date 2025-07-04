@@ -1,5 +1,5 @@
 <script>
-  import LikertScale from './LikertScale.svelte';
+  import LikertScale from './lib/LikertScale.svelte';
   import { fly } from 'svelte/transition';
 
   let currentPage = 0;
