@@ -5,14 +5,7 @@
 
 <div class="scale">
   {#each ["Never", "Rarely", "Sometimes", "Often", "Always", "Not Applicable"] as scaleLabel}
-    <label>
-      {scaleLabel}
-      <input
-        type="radio"
-        bind:group={value}
-        value={scaleLabel}
-      />
-    </label>
+    <RadioButton label={scaleLabel} value={scaleLabel} bind:group={value} />
   {/each}
 </div>
 
