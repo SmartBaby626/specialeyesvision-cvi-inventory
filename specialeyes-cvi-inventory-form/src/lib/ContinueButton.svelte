@@ -1,5 +1,17 @@
-<button>
-  <span>Continue</span>
+<script>
+  import { createEventDispatcher } from 'svelte';
+  export let type = "button";
+  export let disabled = false;
+  export let label = "Continue";
+  const dispatch = createEventDispatcher();
+</script>
+
+<button
+  type={type}
+  disabled={disabled}
+  on:click={(e) => dispatch('click', e)}
+>
+  <span><slot>{label}</slot></span>
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -42,7 +54,6 @@
 
   button:hover svg {
     transform: translateX(5px);
-
   }
   button:hover path {
     transform: translateX(5px);
@@ -50,7 +61,7 @@
   }
   button:hover circle {
     stroke: white;
-    }
+  }
 
   button:active {
     transform: scale(0.95);
