@@ -35,6 +35,14 @@
 </script>
 
 <main class="survey">
+  {#if currentPage > 0}
+    <header class="survey__header">
+      <span class="survey__header-title">Special Eyes Vision Services CVI Inventory Form</span>
+      <div class="survey__progress-bar-container">
+        <div class="survey__progress-bar" style="width: {Math.round((currentPage/3)*100)}%"></div>
+      </div>
+    </header>
+  {/if}
   <div class="survey__viewport">
     {#key currentPage}
       <div
@@ -90,23 +98,76 @@
 <style>
   .survey {
     font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 2rem;
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
     text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .survey__header {
+    width: 100vw;
+    background: #530A7A;
+    color: #fff;
+    padding: 1.2rem 0 0.7rem 0;
+    font-size: 1.3rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px #0002;
+  }
+  .survey__header-title {
+    margin-bottom: 0.5rem;
+  }
+  .survey__progress-bar-container {
+    width: 80vw;
+    max-width: 600px;
+    height: 8px;
+    background: #fff2;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .survey__progress-bar {
+    height: 100%;
+    background: #fff;
+    border-radius: 4px;
+    transition: width 0.3s;
   }
 
   .survey__viewport {
     position: relative;
     overflow: hidden;
     min-height: 300px;
+    height: 100vh;
+    width: 100vw;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .survey__page {
     position: absolute;
-    width: 100%;
+    width: 100vw;
     top: 0;
     left: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .survey__title {
@@ -124,10 +185,15 @@
   }
 
   .survey__navigation {
-    margin-top: 2rem;
+    margin-top: auto;
+    margin-bottom: 2rem;
     display: flex;
     gap: 1rem;
     justify-content: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .survey__button {
