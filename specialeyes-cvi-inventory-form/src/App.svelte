@@ -1,5 +1,6 @@
 <script>
   import LikertScale from './lib/LikertScale.svelte';
+  import RadioButton from './lib/RadioButton.svelte';
   import { fly } from 'svelte/transition';
 
   let currentPage = 0;
