@@ -58,17 +58,17 @@
 
   .radio-button__input:checked + .radio-button__label .radio-button__custom {
     transform: translateY(-50%) scale(0.9);
-    border: 5px solid #4c8bf5;
-    color: #4c8bf5;
+    border: 5px solid #530A7A;
+    color: #530A7A;
   }
 
   .radio-button__input:checked + .radio-button__label {
-    color: #4c8bf5;
+    color: #530A7A;
   }
 
   .radio-button__label:hover .radio-button__custom {
     transform: translateY(-50%) scale(1.2);
-    border-color: #4c8bf5;
-    box-shadow: 0 0 10px #4c8bf580;
+    border-color: #530A7A;
+    box-shadow: 0 0 10px #530A7A80;
   }
 </style>
