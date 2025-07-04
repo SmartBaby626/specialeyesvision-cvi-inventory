@@ -1,64 +1,74 @@
-<label class="radio-button">
-  <input type="radio" name="example-radio" value="option1">
-  <span class="radio"></span>
-  Option 1
-</label>
+<script>
+  export let value;
+  export let group;
+  export let label;
+  export let id = `${label}-${Math.random().toString(36).slice(2, 8)}`;
+</script>
 
-<label class="radio-button">
-  <input type="radio" name="example-radio" value="option2">
-  <span class="radio"></span>
-  Option 2
-</label>
+<div class="radio-button">
+  <input
+    class="radio-button__input"
+    type="radio"
+    id={id}
+    value={value}
+    bind:group={group}
+  />
+  <label for={id} class="radio-button__label">
+    <span class="radio-button__custom"></span>
+    {label}
+  </label>
+</div>
 
 <style>
   .radio-button {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin: 10px;
-    position: relative;
-    align-items: center;
-    color: white;
-  }
-
-  .radio-button input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-  }
-
-  .radio {
-    position: relative;
     display: inline-block;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-    transform: translateZ(-25px);
-    transition: all 0.3s ease-in-out;
+    position: relative;
+    cursor: pointer;
   }
 
-  .radio::before {
+  .radio-button__input {
     position: absolute;
-    content: '';
-    width: 10px;
-    height: 10px;
-    top: 5px;
-    left: 5px;
-    border-radius: 50%;
-    background-color: #fff;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     opacity: 0;
-    transition: all 0.3s ease-in-out;
+    width: 0;
+    height: 0;
   }
 
-  .radio-button input[type="radio"]:checked + .radio {
-    border-color: #5cb85c;
-    transform: translateZ(0px);
-    background-color: #fff;
+  .radio-button__label {
+    display: inline-block;
+    padding-left: 30px;
+    margin-bottom: 10px;
+    position: relative;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   }
 
-  .radio-button input[type="radio"]:checked + .radio::before {
-    opacity: 1;
+  .radio-button__custom {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  }
+
+  .radio-button__input:checked + .radio-button__label .radio-button__custom {
+    transform: translateY(-50%) scale(0.9);
+    border: 5px solid #4c8bf5;
+    color: #4c8bf5;
+  }
+
+  .radio-button__input:checked + .radio-button__label {
+    color: #4c8bf5;
+  }
+
+  .radio-button__label:hover .radio-button__custom {
+    transform: translateY(-50%) scale(1.2);
+    border-color: #4c8bf5;
+    box-shadow: 0 0 10px #4c8bf580;
   }
 </style>
