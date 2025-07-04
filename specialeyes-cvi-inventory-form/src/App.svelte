@@ -1,6 +1,7 @@
 <script>
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
+  import ContinueButton from './lib/ContinueButton.svelte';
   import { fly } from 'svelte/transition';
 
   let currentPage = 0;
@@ -42,7 +43,7 @@
       >
         {#if currentPage === 0}
           <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
-          <button class="survey__button" on:click={nextPage}>Start Survey</button>
+          <ContinueButton on:click={nextPage}>Start Survey</ContinueButton>
 
         {:else if currentPage === 1}
           <h2 class="survey__subtitle">Page 1</h2>
@@ -54,7 +55,7 @@
 
           <div class="survey__navigation">
             <button class="survey__button" on:click={prevPage}>Back</button>
-            <button class="survey__button" on:click={nextPage}>Next</button>
+            <ContinueButton on:click={nextPage}>Next</ContinueButton>
           </div>
 
         {:else if currentPage === 2}
@@ -67,7 +68,7 @@
 
           <div class="survey__navigation">
             <button class="survey__button" on:click={prevPage}>Back</button>
-            <button class="survey__button" on:click={nextPage}>Next</button>
+            <ContinueButton on:click={nextPage}>Next</ContinueButton>
           </div>
 
         {:else if currentPage === 3}
