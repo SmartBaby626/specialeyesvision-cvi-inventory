@@ -4,15 +4,22 @@
   import ContinueButton from './lib/ContinueButton.svelte';
   import BackButton from './lib/BackButton.svelte';
   import { fly } from 'svelte/transition';
+  import questions4_8 from '../Questions/questions4-8.json';
+  import questions9_12 from '../Questions/questions9-12.json';
 
   let currentPage = 0;
   let previousPage = 0;
 
-  let responseQ1 = 0;
-  let responseQ2 = 0;
-  let responseQ3 = 0;
-  let responseQ4 = 0;
-  let responseQ5 = 0;
+  let ageGroup = null; // '4-8' or '9-12'
+  let questions = [];
+  let answers = [];
+
+  function selectAge(group) {
+    ageGroup = group;
+    questions = group === '4-8' ? questions4_8 : questions9_12;
+    answers = questions.map(() => ({ value: '', subValue: '' }));
+    nextPage();
+  }
 
   function nextPage() {
     previousPage = currentPage;
@@ -24,75 +31,77 @@
     currentPage--;
   }
 
-  function handleSubmit() {
-    console.log({
-      responseQ1, responseQ2, responseQ3, responseQ4, responseQ5
-    });
-    alert(`Thanks for submitting!`);
+  function handleLikertChange(idx, val) {
+    answers[idx].value = val;
+    // Reset subValue if main answer is 'Never' or 'Not Applicable'
+    if (val === 'Never' || val === 'Not Applicable') {
+      answers[idx].subValue = '';
+    }
+  }
+
+  function handleSubChange(idx, val) {
+    answers[idx].subValue = val;
+  }
+
+  function handleDynamicSubmit() {
+    // You can use the 'answers' array for the next part of your code
+    console.log('Survey Results:', answers);
+    alert('Thanks for submitting!');
   }
 
   $: isForward = currentPage > previousPage;
 </script>
 
 <main class="survey">
-  {#if currentPage > 0}
+  {#if currentPage === 0}
+    <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
+    <div class="survey__question">Is your child:</div>
+    <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
+      <RadioButton label="4-8 Years Old" value="4-8" bind:group={ageGroup} />
+      <RadioButton label="9-12 Years Old" value="9-12" bind:group={ageGroup} />
+    </div>
+    <ContinueButton on:click={() => selectAge(ageGroup)} disabled={!ageGroup}>Next</ContinueButton>
+  {/if}
+
+  {#if ageGroup && currentPage > 0}
     <header class="survey__header">
       <span class="survey__header-title">Special Eyes Vision Services CVI Inventory Form</span>
       <div class="survey__progress-bar-container">
-        <div class="survey__progress-bar" style="width: {Math.round((currentPage/3)*100)}%"></div>
+        <div class="survey__progress-bar" style="width: {Math.round((currentPage/questions.length)*100)}%"></div>
       </div>
     </header>
   {/if}
-  <div class="survey__viewport">
-    {#key currentPage}
-      <div
-        class="survey__page"
-        in:fly={{ x: isForward ? 400 : -400, duration: 400 }}
-        out:fly={{ x: isForward ? -400 : 400, duration: 400 }}
-      >
-        {#if currentPage === 0}
-          <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
-          <ContinueButton on:click={nextPage}>Start Survey</ContinueButton>
 
-        {:else if currentPage === 1}
-          <h2 class="survey__subtitle">Page 1</h2>
-          <p class="survey__question">1. I feel comfortable reading text on a screen.</p>
-          <LikertScale class="survey__scale" bind:value={responseQ1} />
-
-          <p class="survey__question">2. I can focus on moving objects easily.</p>
-          <LikertScale class="survey__scale" bind:value={responseQ2} />
-
-          <div class="survey__navigation">
-          <BackButton on:click={prevPage}>Back</BackButton>
-            <ContinueButton on:click={nextPage}>Next</ContinueButton>
-          </div>
-
-        {:else if currentPage === 2}
-          <h2 class="survey__subtitle">Page 2</h2>
-          <p class="survey__question">3. I can read in a noisy environment.</p>
-          <LikertScale class="survey__scale" bind:value={responseQ3} />
-
-          <p class="survey__question">4. I prefer high contrast text.</p>
-          <LikertScale class="survey__scale" bind:value={responseQ4} />
-
-          <div class="survey__navigation">
-          <BackButton on:click={prevPage}>Back</BackButton>
-            <ContinueButton on:click={nextPage}>Next</ContinueButton>
-          </div>
-
-        {:else if currentPage === 3}
-          <h2 class="survey__subtitle">Page 3</h2>
-          <p class="survey__question">5. I find it easy to navigate crowded places.</p>
-          <LikertScale class="survey__scale" bind:value={responseQ5} />
-
-          <div class="survey__navigation">
-          <BackButton on:click={prevPage}>Back</BackButton>
-          <ContinueButton on:click={handleSubmit}>Submit</ContinueButton>
-          </div>
-        {/if}
-      </div>
-    {/key}
-  </div>
+  {#if ageGroup && currentPage > 0}
+    <div class="survey__viewport">
+      {#key currentPage}
+        <div class="survey__page" in:fly={{ x: isForward ? 400 : -400, duration: 400 }} out:fly={{ x: isForward ? -400 : 400, duration: 400 }}>
+          {#if currentPage > 0 && currentPage <= questions.length}
+            <h2 class="survey__subtitle">Question {questions[currentPage-1].questionNum}</h2>
+            <p class="survey__question">{questions[currentPage-1].questionText}</p>
+            <LikertScale class="survey__scale" bind:value={answers[currentPage-1].value} />
+            {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
+              <div class="survey__subquestion">
+                <p>{questions[currentPage-1].subQuestionText}</p>
+                {#each questions[currentPage-1].subQuestionOptText.split('/') as opt}
+                  <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
+                {/each}
+              </div>
+            {/if}
+            <div class="survey__navigation">
+              {#if currentPage > 1}
+                <BackButton on:click={prevPage}>Back</BackButton>
+              {/if}
+              <ContinueButton on:click={nextPage} disabled={!answers[currentPage-1].value}>Next</ContinueButton>
+            </div>
+          {:else}
+            <h2 class="survey__subtitle">Review & Submit</h2>
+            <ContinueButton on:click={handleDynamicSubmit}>Submit</ContinueButton>
+          {/if}
+        </div>
+      {/key}
+    </div>
+  {/if}
 </main>
 
 <style>
@@ -200,5 +209,14 @@
     padding: 0.5rem 1rem;
     font-size: 1rem;
     cursor: pointer;
+  }
+
+  .survey__subquestion {
+    margin-top: 1rem;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 </style>
