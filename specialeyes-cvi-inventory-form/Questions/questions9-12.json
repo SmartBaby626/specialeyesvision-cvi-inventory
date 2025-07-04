@@ -1,5 +1,6 @@
 [
     {
+        "DYC": "TRUE",
         "questionNum": 1,
         "questionText": "Trip over toys and obstacles on the floor?",
         "subQuestion": "FALSE",
@@ -8,6 +9,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 2,
         "questionText": "Have difficulty walking down stairs?",
         "subQuestion": "FALSE",
@@ -16,6 +18,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 3,
         "questionText": "Trip at the edges of pavements going up?",
         "subQuestion": "FALSE",
@@ -24,6 +27,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 4,
         "questionText": "Trip at the edges of pavements going down?",
         "subQuestion": "FALSE",
@@ -32,6 +36,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 5,
         "questionText": "Look down when crossing floor boundaries e.g. where lino meets carpet?",
         "subQuestion": "FALSE",
@@ -40,6 +45,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 6,
         "questionText": "Leave food on the near or far side of their plate?",
         "subQuestion": "TRUE",
@@ -48,6 +54,7 @@
         "subQuestionText": "If so, on which side?"
     },
     {
+        "DYC": "TRUE",
         "questionNum": 7,
         "questionText": "Leave food on the right or left side of their plate?",
         "subQuestion": "TRUE",
@@ -56,6 +63,7 @@
         "subQuestionText": "If so, on which side?"
     },
     {
+        "DYC": "TRUE",
         "questionNum": 8,
         "questionText": "Have difficulty finding the beginning of a line when reading?",
         "subQuestion": "FALSE",
@@ -64,6 +72,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 9,
         "questionText": "Have difficulty finding the next word when reading?",
         "subQuestion": "FALSE",
@@ -72,6 +81,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 10,
         "questionText": "Walk out in front of traffic?",
         "subQuestion": "FALSE",
@@ -80,6 +90,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 11,
         "questionText": "Bump into doorframes or partly open doors?",
         "subQuestion": "TRUE",
@@ -88,6 +99,7 @@
         "subQuestionText": "If so, on which side do they bump?"
     },
     {
+        "DYC": "TRUE",
         "questionNum": 12,
         "questionText": "Miss pictures or words on one side of a page?",
         "subQuestion": "TRUE",
@@ -96,6 +108,7 @@
         "subQuestionText": "If so, on which side do they miss words?"
     },
     {
+        "DYC": "TRUE",
         "questionNum": 13,
         "questionText": "Have difficulty seeing scenery from a moving vehicle?",
         "subQuestion": "FALSE",
@@ -104,6 +117,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 14,
         "questionText": "Have difficulty seeing things which are moving quickly, such as small animals?",
         "subQuestion": "FALSE",
@@ -112,6 +126,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 15,
         "questionText": "Have difficulty filling a cup – tend to over fill or under fill?",
         "subQuestion": "FALSE",
@@ -120,6 +135,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 16,
         "questionText": "Avoid watching fast moving TV?",
         "subQuestion": "FALSE",
@@ -128,6 +144,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 17,
         "questionText": "Choose to watch slow moving TV?",
         "subQuestion": "FALSE",
@@ -136,6 +153,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 18,
         "questionText": "Have difficulty catching a ball?",
         "subQuestion": "FALSE",
@@ -144,6 +162,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 19,
         "questionText": "Have difficulty seeing something which is pointed out in the distance?",
         "subQuestion": "FALSE",
@@ -152,6 +171,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 20,
         "questionText": "Have difficulty finding a close friend or relative who is standing in a group?",
         "subQuestion": "FALSE",
@@ -160,6 +180,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 21,
         "questionText": "Have difficulty finding an item in a supermarket e.g. finding the breakfast cereal they want?",
         "subQuestion": "FALSE",
@@ -168,6 +189,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 22,
         "questionText": "Get lost in places where there is a lot to see, e.g. a crowded shop?",
         "subQuestion": "FALSE",
@@ -176,6 +198,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 23,
         "questionText": "Get lost in places which are well known to them?",
         "subQuestion": "FALSE",
@@ -184,6 +207,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 24,
         "questionText": "Have difficulty locating an item of clothing in a pile of clothes?",
         "subQuestion": "FALSE",
@@ -192,6 +216,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 25,
         "questionText": "Have difficulty selecting a chosen toy in a toy box?",
         "subQuestion": "FALSE",
@@ -200,6 +225,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 26,
         "questionText": "Have difficulty recognising/ finding an object if it is partially hidden. i.e. a shoe under a bed with only the toe showing?",
         "subQuestion": "FALSE",
@@ -208,6 +234,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 27,
         "questionText": "Have difficulty identifying right and left shoe?",
         "subQuestion": "FALSE",
@@ -216,6 +243,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 28,
         "questionText": "Sit closer to the TV than about 30cm?",
         "subQuestion": "FALSE",
@@ -224,6 +252,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 29,
         "questionText": "Find copying words or drawings time-consuming and difficult?",
         "subQuestion": "FALSE",
@@ -232,6 +261,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 30,
         "questionText": "When walking, does your child hold onto your clothes, tugging down?",
         "subQuestion": "FALSE",
@@ -240,6 +270,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 31,
         "questionText": "Does your child find uneven ground difficult to walk over?",
         "subQuestion": "FALSE",
@@ -248,6 +279,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 32,
         "questionText": "Does your child bump into low furniture such as a coffee table?",
         "subQuestion": "FALSE",
@@ -256,6 +288,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 33,
         "questionText": "Is low furniture bumped in to if it is moved?",
         "subQuestion": "FALSE",
@@ -264,6 +297,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 34,
         "questionText": "Does your child get angry if furniture is moved?",
         "subQuestion": "FALSE",
@@ -272,6 +306,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 35,
         "questionText": "Does your child explore floor boundaries (e.g. lino/carpet) with their foot before crossing the boundary?",
         "subQuestion": "FALSE",
@@ -280,6 +315,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 36,
         "questionText": "Find inside floor boundaries difficult to cross?",
         "subQuestion": "TRUE",
@@ -288,6 +324,7 @@
         "subQuestionText": "NULL"
     },
     {
+        "DYC": "FALSE",
         "questionNum": 37,
         "questionText": "Does your child reach incorrectly for objects i.e. do they reach beyond or around the object?",
         "subQuestion": "FALSE",
@@ -296,6 +333,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 38,
         "questionText": "When picking up an object, does your child grasp incorrectly i.e. do they miss or knock the object over?",
         "subQuestion": "FALSE",
@@ -304,6 +342,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 39,
         "questionText": "Does your child find it difficult to keep to task for more than 5 minutes?",
         "subQuestion": "FALSE",
@@ -312,6 +351,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 40,
         "questionText": "After being distracted does your child find it difficult to get back to what they were doing?",
         "subQuestion": "FALSE",
@@ -320,6 +360,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 41,
         "questionText": "Does your child bump into things when walking and having a conversation?",
         "subQuestion": "FALSE",
@@ -328,6 +369,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 42,
         "questionText": "Does your child miss objects which are obvious to you because they are different from their background and seem to ‘pop out’ e.g. a bright ball in the grass?",
         "subQuestion": "FALSE",
@@ -336,6 +378,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 43,
         "questionText": "Do rooms with a lot of clutter cause difficult behaviour?",
         "subQuestion": "FALSE",
@@ -344,6 +387,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 44,
         "questionText": "Do quiet places / open countryside cause difficult behaviour?",
         "subQuestion": "FALSE",
@@ -352,6 +396,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 45,
         "questionText": "Is behaviour in a busy supermarket or shopping centre difficult?",
         "subQuestion": "FALSE",
@@ -360,6 +405,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "FALSE",
         "questionNum": 46,
         "questionText": "Does your child react angrily when other restless children cause distraction?",
         "subQuestion": "FALSE",
@@ -368,6 +414,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 47,
         "questionText": "Have difficulty recognising close relatives in real life?",
         "subQuestion": "FALSE",
@@ -376,6 +423,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 48,
         "questionText": "Have difficulty recognising close relatives from photographs?",
         "subQuestion": "FALSE",
@@ -384,6 +432,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 49,
         "questionText": "Mistakenly identify strangers as people known to them?",
         "subQuestion": "FALSE",
@@ -392,6 +441,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 50,
         "questionText": "Have difficulty understanding the meaning of facial expressions?",
         "subQuestion": "FALSE",
@@ -400,6 +450,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 51,
         "questionText": "Have difficulty naming common colours?",
         "subQuestion": "FALSE",
@@ -408,6 +459,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 52,
         "questionText": "Have difficulty naming basic shapes such as squares, triangles and circles?",
         "subQuestion": "FALSE",
@@ -416,6 +468,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 53,
         "questionText": "Have difficulty recognising familiar objects such as the family car?",
         "subQuestion": "FALSE",
@@ -424,6 +477,7 @@
         "subQuestionText": null
     },
     {
+        "DYC": "TRUE",
         "questionNum": 54,
         "questionText": "Have difficulty recognising objects on a similar background i.e. white t-shirt on a white sheet?",
         "subQuestion": "FALSE",
