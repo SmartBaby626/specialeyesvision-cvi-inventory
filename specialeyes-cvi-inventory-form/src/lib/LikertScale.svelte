@@ -1,4 +1,5 @@
 <script>
+  import RadioButton from "./RadioButton.svelte";
   export let value;
 </script>
 
