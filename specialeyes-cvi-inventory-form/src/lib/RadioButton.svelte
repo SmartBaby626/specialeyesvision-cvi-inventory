@@ -39,7 +39,7 @@
     margin-bottom: 10px;
     position: relative;
     font-size: 16px;
-    color: #fff;
+    color: #000;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   }
