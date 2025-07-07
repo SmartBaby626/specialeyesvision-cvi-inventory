@@ -1,0 +1,678 @@
+[
+    {
+        "questionNum": 1,
+        "strategyText": "Keep floor surfaces clear"
+    },
+    {
+        "questionNum": 1,
+        "strategyText": "Plain floor surfaces i.e. plain carpets, laminate floors to highlight contrast."
+    },
+    {
+        "questionNum": 1,
+        "strategyText": "Develop good storage systems and routines to avoid clutter and obstacles on the floor."
+    },
+    {
+        "questionNum": 1,
+        "strategyText": "Try encouraging a policy of slow, look, check, go when moving around a room."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Use additional tactile referencing and physical support, i.e. hand rails at the correct height, adult to hold."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Highlight the edges of stairs with bright colours or dots in the middle of stair."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Colour change at the top and bottom of stairs to emphasis start and finish."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Use bright lighting or spot lighting on stairs, especially top, bottom and landing."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Allow the person to be first or last when using stairs, especially if there is a crowd of people i.e. at school"
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Buddy child with a peer for support especially at school."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Encourage use of lifts/moving stairs if available."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Give permission to leave early or later especially from class to avoid the rush and crowds of other people."
+    },
+    {
+        "questionNum": 2,
+        "strategyText": "Try to ensure classes are on ground floor level where possible."
+    },
+    {
+        "questionNum": 5,
+        "strategyText": "Try plain carpets and floor surfaces, but contrast colour/highlight where there is a boundary i.e. where it changes from carpet to lino."
+    },
+    {
+        "questionNum": 5,
+        "strategyText": "Have good lighting at the boundary areas."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Finger pointing."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Using a text window cut out of a piece of card."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Enlarging the font size."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Reducing the amount of text on the page."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Enlarging text books on the photocopier and blocking out extra bits of work or illustrations."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Using a magnifying glass or magnifying acetates."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Establish the font size and word per page and line that is easiest for the child work with (not the smallest they can read) and ensure that work is provided in this size."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Make an individualised workbook with the beginning of each line highlighted in colour or in bold."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Holding a ruler vertically down the page to show where the start position is."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Try an elevated book stand for reading"
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Practice reading items of interest i.e. use children's newspaper 'First News'."
+    },
+    {
+        "questionNum": 8,
+        "strategyText": "Large print books."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Finger pointing"
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Using a larger font size to establish which font style and size are best."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Double spacing between the words and the lines"
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Vertical reading."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Braille."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "A tilted work station."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Mask off additional text."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Reduce the amount of visual information presented."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Cover text that has been read with card or the back of hand."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Leave larger spaces between the words"
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Break text into small bits"
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Use a computer programme presenting one word at a time (e.g. Ace reader)."
+    },
+    {
+        "questionNum": 9,
+        "strategyText": "Large print books."
+    },
+    {
+        "questionNum": 11,
+        "strategyText": "Highlight door frames in a contrasting colour"
+    },
+    {
+        "questionNum": 11,
+        "strategyText": "Use contrasts in colour and brightness of walls and floors to emphasise where they start and finish."
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Finger pointing"
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Using a text window cut out of a piece of card."
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Give additional verbal reminders to scan"
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Printing text vertically"
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Displacing text to preferred area of visual field"
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Using a vertical book stand"
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Using a sloping work station"
+    },
+    {
+        "questionNum": 12,
+        "strategyText": "Making an individualised book by scanning and enlarging text, and or using photographs of familiar people or objects to reinforce the text."
+    },
+    {
+        "questionNum": 14,
+        "strategyText": "Give additional verbal information “your friend Jenny is at the gate in a pink jacket”"
+    },
+    {
+        "questionNum": 14,
+        "strategyText": "Ensure friends and teachers introduce themselves if approaching in a busy areas where there is a lot of movement"
+    },
+    {
+        "questionNum": 14,
+        "strategyText": "Ensure additional assistance both verbal and physical is offered to help find friends/ family in busy places i.e. playground."
+    },
+    {
+        "questionNum": 14,
+        "strategyText": "Encourage child to rely on voice recognition to locate friends and family."
+    },
+    {
+        "questionNum": 16,
+        "strategyText": "Sit close to the TV to minimise other visual distractions."
+    },
+    {
+        "questionNum": 16,
+        "strategyText": "Minimise the visual distractions around the TV i.e. pictures."
+    },
+    {
+        "questionNum": 16,
+        "strategyText": "Ensure class teacher is aware that many curriculum TV programmes may be unsuitable due to the speed and content. The time spent on TV by other children may be best utilised by child for another task."
+    },
+    {
+        "questionNum": 16,
+        "strategyText": "Avoid using TV/DVD as a teaching tool."
+    },
+    {
+        "questionNum": 17,
+        "strategyText": "Sit close to the TV to minimise other visual distractions."
+    },
+    {
+        "questionNum": 17,
+        "strategyText": "Minimise the visual distractions around the TV i.e. pictures."
+    },
+    {
+        "questionNum": 17,
+        "strategyText": "Ensure class teacher is aware that many curriculum TV programmes may be unsuitable due to the speed and content. The time spent on TV by other children may be best utilised by child for another task."
+    },
+    {
+        "questionNum": 17,
+        "strategyText": "Avoid using TV/DVD as a teaching tool."
+    },
+    {
+        "questionNum": 18,
+        "strategyText": "Practice catching skills using a balloon which will move more slowly."
+    },
+    {
+        "questionNum": 18,
+        "strategyText": "Try using large brightly coloured balls or balls with sound or light effects."
+    },
+    {
+        "questionNum": 20,
+        "strategyText": "Give additional verbal cues e.g. Mum calls out name to allow voice recognition to assist with visual scanning."
+    },
+    {
+        "questionNum": 20,
+        "strategyText": "Have a pre-determined meeting place so that the child knows where to look for person."
+    },
+    {
+        "questionNum": 20,
+        "strategyText": "Ensure highly visible, easily identifiable clothing is worn i.e. a pink jumper, a luminous jacket. This item must be worn so that it is visible from all angles i.e. a jumper, not a badge. The child must be informed about the item."
+    },
+    {
+        "questionNum": 20,
+        "strategyText": "Encourage the use of voice recognition skills."
+    },
+    {
+        "questionNum": 20,
+        "strategyText": "Encourage child to use a mobile phone to call/text the person."
+    },
+    {
+        "questionNum": 20,
+        "strategyText": "Encourage the child to stay still and call for the person."
+    },
+    {
+        "questionNum": 21,
+        "strategyText": "Set up and area for placement of important items i.e. bedside table with storage box or tray."
+    },
+    {
+        "questionNum": 21,
+        "strategyText": "Reduce the amount of visual information available i.e. the number of items on a tray."
+    },
+    {
+        "questionNum": 23,
+        "strategyText": "Highlight desk in class with marker tape."
+    },
+    {
+        "questionNum": 23,
+        "strategyText": "Encourage the use of land markers – pictures, photographs on the wall, counting doors with a memory map."
+    },
+    {
+        "questionNum": 23,
+        "strategyText": "Use mnemonic memory strategies to help route finding by recounting land marks."
+    },
+    {
+        "questionNum": 23,
+        "strategyText": "Try using floor markers to help route finding around the class/school. i.e footprints, circles on the floor."
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Minimise the number of items in tray, bag, shelves and cupboard."
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Minimise number of items on desk, in pencil case, in school bag."
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Use transparent containers, pencil case, school bag."
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Encourage return of items to a set position."
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Organise storage system with clearly labelled drawers and boxes using pictures, photos, colours"
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Reduce the amount of items to choose from."
+    },
+    {
+        "questionNum": 25,
+        "strategyText": "Involve individual in reorganising and minimising storage systems."
+    },
+    {
+        "questionNum": 26,
+        "strategyText": "Ensure items are clearly visible and not overlapping."
+    },
+    {
+        "questionNum": 26,
+        "strategyText": "Have an organised workspace and mark out lines on the desk with coloured tape for book, pencil etc. Keep items required on desk to a minimum."
+    },
+    {
+        "questionNum": 26,
+        "strategyText": "Use a schoolbag with individual pockets."
+    },
+    {
+        "questionNum": 26,
+        "strategyText": "Use a flat pencil case with a clearly allocated space for each item."
+    },
+    {
+        "questionNum": 26,
+        "strategyText": "Try a transparent pencil case."
+    },
+    {
+        "questionNum": 28,
+        "strategyText": "Avoid visual clutter between seats and TV and beside or above TV"
+    },
+    {
+        "questionNum": 28,
+        "strategyText": "Try smaller TV if a large screen offers too much demand for visual scanning."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Minimise copying demands by providing information on a printed sheet."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Email or scan information to a laptop rather than copy it."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Ensure written material is clearly visible appropriate for acuity and contrast."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Find out what colour of ink is most visible – try a white board"
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Reduce visual clutter on the board leaving only relevant text."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Remove distracting visual information from above or beside the board. i.e. pictures, mobiles."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Positioning should be directly facing the board and at the best distance for the individual to minimise visual clutter, reduce head movements and give appropriate visual magnification."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Maximise lighting at board area (without glare)."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Present large well spaced script on board."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Use mobile phone to photograph instructions and messages from the board rather than write them down i.e. homework instructions."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Make use of auditory memory skills – use verbal rather than written instruction"
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Do not expect the child to write and speak or write and listen at the same time."
+    },
+    {
+        "questionNum": 29,
+        "strategyText": "Use a scribe for lengthy passages of copying."
+    },
+    {
+        "questionNum": 31,
+        "strategyText": "Give additional physical support i.e. rails/banisters as required."
+    },
+    {
+        "questionNum": 31,
+        "strategyText": "Minimise height variations on floor surfaces"
+    },
+    {
+        "questionNum": 31,
+        "strategyText": "In playareas use Astroturf, coloured matting and vary colours for different areas. Use flush rubber flag stones to emphasise different areas of the ground."
+    },
+    {
+        "questionNum": 36,
+        "strategyText": "Clearly mark floor boundaries and height changes in surfaces."
+    },
+    {
+        "questionNum": 36,
+        "strategyText": "Use contrasting colours after different surfaces."
+    },
+    {
+        "questionNum": 36,
+        "strategyText": "Ensure good lighting in areas with floor boundaries"
+    },
+    {
+        "questionNum": 36,
+        "strategyText": "Use plain colours of floor covering."
+    },
+    {
+        "questionNum": 362,
+        "strategyText": "Clearly mark floor boundaries and height changes in surfaces."
+    },
+    {
+        "questionNum": 362,
+        "strategyText": "Ensure good lighting in areas with floor boundaries"
+    },
+    {
+        "questionNum": 362,
+        "strategyText": "Use plain coloured floor covering."
+    },
+    {
+        "questionNum": 37,
+        "strategyText": "Try using items that are contrasting in colour with the table unit."
+    },
+    {
+        "questionNum": 38,
+        "strategyText": "Using items which have a high colour contrast"
+    },
+    {
+        "questionNum": 38,
+        "strategyText": "Using weighted items"
+    },
+    {
+        "questionNum": 38,
+        "strategyText": "Blu-tak on bottom of items."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Minimise visual distractions around the work area."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Consider the need to minimise other distractions around the work area i.e. sound, movement."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Encourage short periods of focused attention."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Time concentration span and work with the minimum concentration time to build it up."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Try using a sound or visual timer to set limits."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Vary tasks and demands i.e. seated, standing, moving, listening, talking, looking"
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Give additional verbal reminders and encouragement “you are doing well just one more minute”"
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Give non-verbal reminders to get back on task i.e. tap on shoulder."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Allow frequent movement breaks - to hand out pencils, take a message."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Position near to front of the class facing the board and teacher to reduce visual distractions and looking over heads. Do not position right at the front of the class as child will be tempted to turn around."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Try a chair with arms to assist sitting balance if required."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Try a separate desk for child at the end of the group to give increased personal space but not exclusion."
+    },
+    {
+        "questionNum": 39,
+        "strategyText": "Try a fidget object to help with attention when using listening skills i.e. rubber, giant paper clip, pencil."
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Give additional verbal reminders. i.e. “it is time to get back to work, are you finished yet?”"
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Minimise distractions around the work area."
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Present work tasks in short blocks breaking down activities."
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Present tasks one at a time."
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Give additional movement breaks to alter positioning."
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Try a screened work area."
+    },
+    {
+        "questionNum": 40,
+        "strategyText": "Try a quiet work station."
+    },
+    {
+        "questionNum": 42,
+        "strategyText": "Reduce the amount of items presented."
+    },
+    {
+        "questionNum": 42,
+        "strategyText": "Space out items."
+    },
+    {
+        "questionNum": 42,
+        "strategyText": "Maximise contrast and visibility to increase pop out effect."
+    },
+    {
+        "questionNum": 43,
+        "strategyText": "Minimise clutter, especially visual clutter i.e. pictures on the wall, mobiles in class."
+    },
+    {
+        "questionNum": 43,
+        "strategyText": "Provide a quiet area with less clutter and visual stimulation in class."
+    },
+    {
+        "questionNum": 43,
+        "strategyText": "Be pre-warned to expect difficult behaviour and take appropriate measures"
+    },
+    {
+        "questionNum": 43,
+        "strategyText": "Try using clearly labelled storage to reduce the amount of visual clutter around."
+    },
+    {
+        "questionNum": 43,
+        "strategyText": "Try smaller areas with less noise and visual information i.e. smaller shops"
+    },
+    {
+        "questionNum": 45,
+        "strategyText": "Try a tactile object to provide alternative sensory input i.e. fidget object, toy, rubber, giant paper clip"
+    },
+    {
+        "questionNum": 45,
+        "strategyText": "Try scents on a hanky to provide additional sensory input."
+    },
+    {
+        "questionNum": 45,
+        "strategyText": "Encourage help and assistance; give child a task to do at assembly."
+    },
+    {
+        "questionNum": 45,
+        "strategyText": "Allow the child to rest their head on their arms for time out or if appropriate to move to a quiet area."
+    },
+    {
+        "questionNum": 45,
+        "strategyText": "Allow regular movement breaks"
+    },
+    {
+        "questionNum": 45,
+        "strategyText": "Have a colour-coded system of communication i.e. green - go, amber - tiring, red – need a break."
+    },
+    {
+        "questionNum": 46,
+        "strategyText": "Position in a chair with additional personal space."
+    },
+    {
+        "questionNum": 46,
+        "strategyText": "Try an individual work station."
+    },
+    {
+        "questionNum": 46,
+        "strategyText": "Try a screened-off work area."
+    },
+    {
+        "questionNum": 46,
+        "strategyText": "Try head phones or ear plugs to reduce the noise level and auditory distractions."
+    },
+    {
+        "questionNum": 50,
+        "strategyText": "Ensure people interacting with the person are aware of this and give additional verbal cues."
+    },
+    {
+        "questionNum": 50,
+        "strategyText": "Establish if the person can recognise facial expression at all, and if so, what is the optimal distance"
+    },
+    {
+        "questionNum": 50,
+        "strategyText": "Encourage individual to focus on tone of voice and words being used."
+    },
+    {
+        "questionNum": 50,
+        "strategyText": "Give practice and training to recognise facial expressions."
+    },
+    {
+        "questionNum": 50,
+        "strategyText": "Give a verbal explanation to accompany the facial expression using tone of voice and words. Encourage everyone interacting with child to also do this."
+    },
+    {
+        "questionNum": 50,
+        "strategyText": "Use of voice and language with exaggerated quality of expressed emotions to assist child with understanding."
+    },
+    {
+        "questionNum": 51,
+        "strategyText": "Establish if this is due to colour blindness"
+    },
+    {
+        "questionNum": 51,
+        "strategyText": "Discover if it is due to word recognition"
+    },
+    {
+        "questionNum": 51,
+        "strategyText": "Try applying the concept of conceptual linkage i.e. rose red, apple green, sky blue."
+    },
+    {
+        "questionNum": 52,
+        "strategyText": "Use a tactile approach touching and exploring objects with hands"
+    },
+    {
+        "questionNum": 52,
+        "strategyText": "Minimise the amount of visual information presented at one time"
+    },
+    {
+        "questionNum": 52,
+        "strategyText": "Play computer games to reinforce recognition skills."
+    },
+    {
+        "questionNum": 53,
+        "strategyText": "Get a unique identifiable visible marker to help recognition i.e. poster on the door."
+    },
+    {
+        "questionNum": 54,
+        "strategyText": "Use contrasting, plain colours and backgrounds"
+    }
+]
