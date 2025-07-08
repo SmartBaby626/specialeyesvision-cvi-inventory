@@ -16,6 +16,8 @@
   * TODO: Update mobile device compatibility
   * TODO: Check compatibility with different browsers
   * TODO: Check compatibility with mobile (specifically touchscreen)
+  * TODO: Create CNAME file
+  * TODO: Host on GitHub Pages
 */
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
