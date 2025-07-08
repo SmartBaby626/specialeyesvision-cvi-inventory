@@ -10,11 +10,9 @@ import {
 } from 'svelte/transition';
 import questions4_8 from '../Questions/questions4-8.json';
 import questions9_12 from '../Questions/questions9-12.json';
-
 let currentPage = 0;
 let previousPage = 0;
 let surveyCompleted = false;
-
 let ageGroup = null;
 let questions = [];
 let answers = [];
