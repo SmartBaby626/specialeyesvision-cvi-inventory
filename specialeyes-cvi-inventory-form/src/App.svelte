@@ -1,82 +1,136 @@
 <script>
-import LikertScale from './lib/LikertScale.svelte';
-import RadioButton from './lib/RadioButton.svelte';
-import ContinueButton from './lib/ContinueButton.svelte';
-import BackButton from './lib/BackButton.svelte';
-import PDFGenerator from './lib/PDFGenerator.svelte';
-import {
-    fly,
-    fade,
-    slide
-} from 'svelte/transition';
-import questions4_8 from '../Questions/questions4-8.json';
-import questions9_12 from '../Questions/questions9-12.json';
-let currentPage = 0;
-let previousPage = 0;
-let surveyCompleted = false;
-let ageGroup = null;
-let questions = [];
-let answers = [];
-let surveyResults = null;
-  let showThankYou = false;
-  let pdfGenerated = false;
-  let pdfReady = false;
+  import LikertScale from './lib/LikertScale.svelte';
+  import RadioButton from './lib/RadioButton.svelte';
+  import ContinueButton from './lib/ContinueButton.svelte';
+  import BackButton from './lib/BackButton.svelte';
+  import { fly, fade, slide } from 'svelte/transition';
+  import questions4_8 from '../Questions/questions4-8.json';
+  import questions9_12 from '../Questions/questions9-12.json';
 
-function selectAge(group) {
+  let currentPage = 0;
+  let previousPage = 0;
+  let surveyCompleted = false;
+  let ageGroup = null;
+  let questions = [];
+  let answers = [];
+
+  function selectAge(group) {
     ageGroup = group;
     questions = group === '4-8' ? questions4_8 : questions9_12;
-    answers = questions.map(() => ({
-        value: '',
-        subValue: ''
-    }));
+    answers = questions.map(() => ({ value: '', subValue: '' }));
     nextPage();
-}
+  }
 
-function nextPage() {
+  function nextPage() {
     previousPage = currentPage;
     currentPage++;
-}
+  }
 
-function prevPage() {
+  function prevPage() {
     previousPage = currentPage;
     currentPage--;
-}
+  }
 
-function handleLikertChange(idx, val) {
+  function handleLikertChange(idx, val) {
     answers[idx].value = val;
-
     if (val === 'Never' || val === 'Not Applicable') {
-        answers[idx].subValue = '';
+      answers[idx].subValue = '';
     }
-}
+  }
 
-function handleSubChange(idx, val) {
+  function handleSubChange(idx, val) {
     answers[idx].subValue = val;
-}
+  }
 
-function handleDynamicSubmit() {
-
-    surveyResults = {
-        ageGroup,
-        responses: questions.map((q, idx) => ({
-            questionNum: q.questionNum,
-            questionText: q.questionText,
-            answer: answers[idx].value,
-
-            ...(q.subQuestion === 'TRUE' && {
-                subQuestionText: q.subQuestionText,
-                subAnswer: answers[idx].subValue
-            })
-        }))
+  async function handleDynamicSubmit() {
+    const results = {
+      ageGroup,
+      responses: questions.map((q, idx) => ({
+        questionNum: q.questionNum,
+        questionText: q.questionText,
+        answer: answers[idx].value,
+        ...(q.subQuestion === 'TRUE' && {
+          subQuestionText: q.subQuestionText,
+          subAnswer: answers[idx].subValue
+        })
+      }))
     };
 
-    console.log('Survey Results:', surveyResults);
+    // Generate PDF directly
+    await generatePDF(results);
     surveyCompleted = true;
-        showThankYou = true;
-    pdfGenerated = true;
-}
+  }
 
-$: isForward = currentPage > previousPage;
+  async function generatePDF(results) {
+    // Dynamically import html2pdf only when needed
+    const html2pdf = (await import('html2pdf.js')).default;
+    
+    // Create temporary container in memory (never added to DOM)
+    const tempDiv = document.createElement('div');
+    
+    // Build PDF content with inline styles
+    tempDiv.innerHTML = `
+      <div style="
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      ">
+        <h1 style="color: #530A7A; text-align: center; margin-bottom: 30px;">
+          CVI Survey Results
+        </h1>
+        
+        <div style="margin-bottom: 40px;">
+          <h2 style="color: #530A7A; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+            Participant Information
+          </h2>
+          <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+        </div>
+        
+        ${results.responses.map(response => `
+          <div style="
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+          ">
+            <h3 style="color: #530A7A;">Question ${response.questionNum}</h3>
+            <p style="font-weight: bold;">${response.questionText}</p>
+            <p><strong>Response:</strong> ${response.answer}</p>
+            ${response.subQuestionText ? `
+              <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #530A7A;">
+                <p><strong>Follow-up:</strong> ${response.subQuestionText}</p>
+                <p><strong>Answer:</strong> ${response.subAnswer || 'Not provided'}</p>
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // Generate PDF with proper settings
+    await html2pdf()
+      .set({
+        margin: 15,
+        filename: `CVI-Survey-Results-${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          logging: false,
+          letterRendering: true,
+          useCORS: true
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      })
+      .from(tempDiv)
+      .save();
+  }
+
+  $: isForward = currentPage > previousPage;
 </script>
 
 <main class="survey">
@@ -84,14 +138,10 @@ $: isForward = currentPage > previousPage;
     <div class="thank-you">
       <h1 class="survey__title">Thank You!</h1>
       <p>Your responses have been recorded.</p>
-      {#if surveyResults}
-        <PDFGenerator 
-          {surveyResults} 
-          autoDownload={true}
-          fileName="cvi-survey-results.pdf"
-        />
-        <p class="download-message">Your PDF download should start automatically...</p>
-      {/if}
+      <p class="download-notice">The report has been downloaded to your device.</p>
+      
+      <!-- Future expansion: Add email button here -->
+      <!-- <button on:click={() => sendEmail(results)}>Email Results</button> -->
     </div>
   {:else}
     {#if currentPage === 0}
@@ -149,9 +199,19 @@ $: isForward = currentPage > previousPage;
       </div>
     {/if}
   {/if}
-</main>
+    </main>
 
 <style>
+  .thank-you {
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .download-notice {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 1rem;
+  }
 .survey {
     font-family: Arial, sans-serif;
     width: 100vw;
@@ -280,10 +340,5 @@ $: isForward = currentPage > previousPage;
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
-}
-
-.thank-you {
-    text-align: center;
-    padding: 2rem;
 }
 </style>
