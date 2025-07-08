@@ -62,13 +62,13 @@
   }
 
   async function generatePDF(results) {
-    // Dynamically import html2pdf only when needed
+
     const html2pdf = (await import('html2pdf.js')).default;
     
-    // Create temporary container in memory (never added to DOM)
+
     const tempDiv = document.createElement('div');
     
-    // Build PDF content with inline styles
+
     tempDiv.innerHTML = `
       <div style="
         font-family: Arial, sans-serif;
@@ -108,7 +108,6 @@
       </div>
     `;
 
-    // Generate PDF with proper settings
     await html2pdf()
       .set({
         margin: 15,
@@ -140,8 +139,6 @@
       <p>Your responses have been recorded.</p>
       <p class="download-notice">The report has been downloaded to your device.</p>
       
-      <!-- Future expansion: Add email button here -->
-      <!-- <button on:click={() => sendEmail(results)}>Email Results</button> -->
     </div>
   {:else}
     {#if currentPage === 0}
