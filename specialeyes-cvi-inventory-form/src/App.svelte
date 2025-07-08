@@ -1,139 +1,146 @@
 <script>
-  import LikertScale from './lib/LikertScale.svelte';
-  import RadioButton from './lib/RadioButton.svelte';
-  import ContinueButton from './lib/ContinueButton.svelte';
-  import BackButton from './lib/BackButton.svelte';
-  import { fly, fade, slide } from 'svelte/transition';
-  import questions4_8 from '../Questions/questions4-8.json';
-  import questions9_12 from '../Questions/questions9-12.json';
+import LikertScale from './lib/LikertScale.svelte';
+import RadioButton from './lib/RadioButton.svelte';
+import ContinueButton from './lib/ContinueButton.svelte';
+import BackButton from './lib/BackButton.svelte';
+import {
+    fly,
+    fade,
+    slide
+} from 'svelte/transition';
+import questions4_8 from '../Questions/questions4-8.json';
+import questions9_12 from '../Questions/questions9-12.json';
 
-  let currentPage = 0;
-  let previousPage = 0;
-  let surveyCompleted = false; 
+let currentPage = 0;
+let previousPage = 0;
+let surveyCompleted = false;
 
-  let ageGroup = null;
-  let questions = [];
-  let answers = [];
-  let surveyResults = null;
+let ageGroup = null;
+let questions = [];
+let answers = [];
+let surveyResults = null;
 
-  function selectAge(group) {
+function selectAge(group) {
     ageGroup = group;
     questions = group === '4-8' ? questions4_8 : questions9_12;
-    answers = questions.map(() => ({ value: '', subValue: '' }));
+    answers = questions.map(() => ({
+        value: '',
+        subValue: ''
+    }));
     nextPage();
-  }
+}
 
-  function nextPage() {
+function nextPage() {
     previousPage = currentPage;
     currentPage++;
-  }
+}
 
-  function prevPage() {
+function prevPage() {
     previousPage = currentPage;
     currentPage--;
-  }
+}
 
-  function handleLikertChange(idx, val) {
+function handleLikertChange(idx, val) {
     answers[idx].value = val;
-   
+
     if (val === 'Never' || val === 'Not Applicable') {
-      answers[idx].subValue = '';
+        answers[idx].subValue = '';
     }
-  }
+}
 
-  function handleSubChange(idx, val) {
+function handleSubChange(idx, val) {
     answers[idx].subValue = val;
-  }
+}
 
-  function handleDynamicSubmit() {
-  
+function handleDynamicSubmit() {
+
     surveyResults = {
-      ageGroup,
-      responses: questions.map((q, idx) => ({
-        questionNum: q.questionNum,
-        questionText: q.questionText,
-        answer: answers[idx].value,
-       
-        ...(q.subQuestion === 'TRUE' && {
-          subQuestionText: q.subQuestionText,
-          subAnswer: answers[idx].subValue
-        })
-      }))
+        ageGroup,
+        responses: questions.map((q, idx) => ({
+            questionNum: q.questionNum,
+            questionText: q.questionText,
+            answer: answers[idx].value,
+
+            ...(q.subQuestion === 'TRUE' && {
+                subQuestionText: q.subQuestionText,
+                subAnswer: answers[idx].subValue
+            })
+        }))
     };
 
     console.log('Survey Results:', surveyResults);
     surveyCompleted = true;
-  }
+}
 
-  $: isForward = currentPage > previousPage;
+$: isForward = currentPage > previousPage;
 </script>
 
 <main class="survey">
-  {#if surveyCompleted}
+    {#if surveyCompleted}
     <div class="thank-you">
-      <h1 class="survey__title">Thank You!</h1>
-      <p>Your responses have been recorded.</p>
+        <h1 class="survey__title">Thank You!</h1>
+        <p>Your responses have been recorded.</p>
     </div>
-  {:else}
+    {:else}
     {#if currentPage === 0}
-      <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
-      <div class="survey__question">Is your child:</div>
-      <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
+    <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
+    <div class="survey__question">Is your child:</div>
+    <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
         <RadioButton label="4-8 Years Old" value="4-8" bind:group={ageGroup} />
         <RadioButton label="9-12 Years Old" value="9-12" bind:group={ageGroup} />
-      </div>
-      <ContinueButton on:click={() => selectAge(ageGroup)} disabled={!ageGroup}>Next</ContinueButton>
+    </div>
+    <ContinueButton on:click={() => selectAge(ageGroup)} disabled={!ageGroup}>Next</ContinueButton>
     {/if}
 
     {#if ageGroup && currentPage > 0}
-      <header class="survey__header">
+    <header class="survey__header">
         <span class="survey__header-title">Special Eyes Vision Services CVI Inventory Form</span>
         <div class="survey__progress-bar-container">
-          <div class="survey__progress-bar" style="width: {Math.round((currentPage/questions.length)*100)}%"></div>
+            <div class="survey__progress-bar" style="width: {Math.round((currentPage/questions.length)*100)}%"></div>
         </div>
-      </header>
+    </header>
     {/if}
 
     {#if ageGroup && currentPage > 0}
-      <div class="survey__viewport">
+    <div class="survey__viewport">
         {#key currentPage}
-          <div class="survey__page" in:fly={{ x: isForward ? 400 : -400, duration: 400 }} out:fly={{ x: isForward ? -400 : 400, duration: 400 }}>
+        <div class="survey__page" in:fly={{ x: isForward ? 400 : -400, duration: 400 }} out:fly={{ x: isForward ? -400 : 400, duration: 400 }}>
             {#if currentPage > 0 && currentPage <= questions.length}
-              <h2 class="survey__subtitle">Question {questions[currentPage-1].questionNum}</h2>
-              {#if questions[currentPage-1].DYC === 'TRUE'}
-                <div class="survey__question-lead" style="color: #000;">Does your child...</div>
-              {/if}
-              <p class="survey__question">{questions[currentPage-1].questionText}</p>
-              <LikertScale class="survey__scale" bind:value={answers[currentPage-1].value} />
-              {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
-                <div in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
-                  <div class="survey__subquestion" in:slide={{ duration: 300 }} out:slide={{ duration: 300 }}>
+            <h2 class="survey__subtitle">Question {questions[currentPage-1].questionNum}</h2>
+            {#if questions[currentPage-1].DYC === 'TRUE'}
+            <div class="survey__question-lead" style="color: #000;">Does your child...</div>
+            {/if}
+            <p class="survey__question">{questions[currentPage-1].questionText}</p>
+            <LikertScale class="survey__scale" bind:value={answers[currentPage-1].value} />
+            {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
+            <div in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+                <div class="survey__subquestion" in:slide={{ duration: 300 }} out:slide={{ duration: 300 }}>
                     <p>{questions[currentPage-1].subQuestionText}</p>
                     {#each questions[currentPage-1].subQuestionOptText.split('/') as opt}
-                      <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
+                    <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
                     {/each}
-                  </div>
                 </div>
-              {/if}
-              <div class="survey__navigation">
+            </div>
+            {/if}
+            <div class="survey__navigation">
                 {#if currentPage > 1}
-                  <BackButton on:click={prevPage}>Back</BackButton>
+                <BackButton on:click={prevPage}>Back</BackButton>
                 {/if}
                 <ContinueButton on:click={nextPage} disabled={!answers[currentPage-1].value}>Next</ContinueButton>
-              </div>
+            </div>
             {:else}
-              <h2 class="survey__subtitle">Review & Submit</h2>
-              <ContinueButton on:click={handleDynamicSubmit}>Submit</ContinueButton>
+            <h2 class="survey__subtitle">Review & Submit</h2>
+            <ContinueButton on:click={handleDynamicSubmit}>Submit</ContinueButton>
             {/if}
-          </div>
+        </div>
         {/key}
-      </div>
+    </div>
     {/if}
-  {/if}
+    {/if}
 </main>
 
 <style>
-  .survey {
+.survey {
     font-family: Arial, sans-serif;
     width: 100vw;
     min-height: 100vh;
@@ -145,9 +152,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
+}
 
-  .survey__header {
+.survey__header {
     width: 100vw;
     background: #530A7A;
     color: #fff;
@@ -163,26 +170,29 @@
     left: 0;
     z-index: 10;
     box-shadow: 0 2px 8px #0002;
-  }
-  .survey__header-title {
+}
+
+.survey__header-title {
     margin-bottom: 0.5rem;
-  }
-  .survey__progress-bar-container {
+}
+
+.survey__progress-bar-container {
     width: 80vw;
     max-width: 600px;
     height: 8px;
     background: #fff2;
     border-radius: 4px;
     overflow: hidden;
-  }
-  .survey__progress-bar {
+}
+
+.survey__progress-bar {
     height: 100%;
     background: #fff;
     border-radius: 4px;
     transition: width 0.3s;
-  }
+}
 
-  .survey__viewport {
+.survey__viewport {
     position: relative;
     overflow: hidden;
     min-height: 300px;
@@ -193,9 +203,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
+}
 
-  .survey__page {
+.survey__page {
     position: absolute;
     width: 100vw;
     top: 0;
@@ -205,31 +215,31 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
+}
 
-  .survey__title {
+.survey__title {
     font-size: 2rem;
     margin-bottom: 2rem;
-  }
+}
 
-  .survey__subtitle {
+.survey__subtitle {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-  }
+}
 
-  .survey__question-lead {
+.survey__question-lead {
     font-size: 1.1rem;
     font-weight: 500;
     margin-bottom: 0.2rem;
     color: #000;
     letter-spacing: 0.2px;
-  }
+}
 
-  .survey__question {
+.survey__question {
     margin: 1rem 0 0.5rem 0;
-  }
+}
 
-  .survey__navigation {
+.survey__navigation {
     margin-top: auto;
     margin-bottom: 2rem;
     display: flex;
@@ -239,25 +249,25 @@
     left: 0;
     right: 0;
     bottom: 0;
-  }
+}
 
-  .survey__button {
+.survey__button {
     padding: 0.5rem 1rem;
     font-size: 1rem;
     cursor: pointer;
-  }
+}
 
-  .survey__subquestion {
+.survey__subquestion {
     margin-top: 1rem;
     text-align: left;
     width: 100%;
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
-  }
-  
-  .thank-you {
+}
+
+.thank-you {
     text-align: center;
     padding: 2rem;
-  }
+}
 </style>
