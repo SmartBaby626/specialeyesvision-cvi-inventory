@@ -3,6 +3,7 @@ import LikertScale from './lib/LikertScale.svelte';
 import RadioButton from './lib/RadioButton.svelte';
 import ContinueButton from './lib/ContinueButton.svelte';
 import BackButton from './lib/BackButton.svelte';
+import PDFGenerator from './lib/PDFGenerator.svelte';
 import {
     fly,
     fade,
@@ -17,6 +18,9 @@ let ageGroup = null;
 let questions = [];
 let answers = [];
 let surveyResults = null;
+  let showThankYou = false;
+  let pdfGenerated = false;
+  let pdfReady = false;
 
 function selectAge(group) {
     ageGroup = group;
@@ -68,73 +72,83 @@ function handleDynamicSubmit() {
 
     console.log('Survey Results:', surveyResults);
     surveyCompleted = true;
+        showThankYou = true;
+    pdfGenerated = true;
 }
 
 $: isForward = currentPage > previousPage;
 </script>
 
 <main class="survey">
-    {#if surveyCompleted}
+  {#if surveyCompleted}
     <div class="thank-you">
-        <h1 class="survey__title">Thank You!</h1>
-        <p>Your responses have been recorded.</p>
+      <h1 class="survey__title">Thank You!</h1>
+      <p>Your responses have been recorded.</p>
+      {#if surveyResults}
+        <PDFGenerator 
+          {surveyResults} 
+          autoDownload={true}
+          fileName="cvi-survey-results.pdf"
+        />
+        <p class="download-message">Your PDF download should start automatically...</p>
+      {/if}
     </div>
-    {:else}
+  {:else}
     {#if currentPage === 0}
-    <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
-    <div class="survey__question">Is your child:</div>
-    <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
+      <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
+      <div class="survey__question">Is your child:</div>
+      <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
         <RadioButton label="4-8 Years Old" value="4-8" bind:group={ageGroup} />
         <RadioButton label="9-12 Years Old" value="9-12" bind:group={ageGroup} />
-    </div>
-    <ContinueButton on:click={() => selectAge(ageGroup)} disabled={!ageGroup}>Next</ContinueButton>
+      </div>
+      <ContinueButton on:click={() => selectAge(ageGroup)} disabled={!ageGroup}>Next</ContinueButton>
     {/if}
 
     {#if ageGroup && currentPage > 0}
-    <header class="survey__header">
+      <header class="survey__header">
         <span class="survey__header-title">Special Eyes Vision Services CVI Inventory Form</span>
         <div class="survey__progress-bar-container">
-            <div class="survey__progress-bar" style="width: {Math.round((currentPage/questions.length)*100)}%"></div>
+          <div class="survey__progress-bar" style="width: {Math.round((currentPage/questions.length)*100)}%"></div>
         </div>
-    </header>
+      </header>
     {/if}
 
     {#if ageGroup && currentPage > 0}
-    <div class="survey__viewport">
+      <div class="survey__viewport">
         {#key currentPage}
-        <div class="survey__page" in:fly={{ x: isForward ? 400 : -400, duration: 400 }} out:fly={{ x: isForward ? -400 : 400, duration: 400 }}>
+          <div class="survey__page" in:fly={{ x: isForward ? 400 : -400, duration: 400 }} out:fly={{ x: isForward ? -400 : 400, duration: 400 }}>
             {#if currentPage > 0 && currentPage <= questions.length}
-            <h2 class="survey__subtitle">Question {questions[currentPage-1].questionNum}</h2>
-            {#if questions[currentPage-1].DYC === 'TRUE'}
-            <div class="survey__question-lead" style="color: #000;">Does your child...</div>
-            {/if}
-            <p class="survey__question">{questions[currentPage-1].questionText}</p>
-            <LikertScale class="survey__scale" bind:value={answers[currentPage-1].value} />
-            {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
-            <div in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
-                <div class="survey__subquestion" in:slide={{ duration: 300 }} out:slide={{ duration: 300 }}>
+              <h2 class="survey__subtitle">Question {questions[currentPage-1].questionNum}</h2>
+              {#if questions[currentPage-1].DYC === 'TRUE'}
+                <div class="survey__question-lead" style="color: #000;">Does your child...</div>
+              {/if}
+              <p class="survey__question">{questions[currentPage-1].questionText}</p>
+              <LikertScale class="survey__scale" bind:value={answers[currentPage-1].value} />
+              {#if questions[currentPage-1].subQuestion === 'TRUE' && answers[currentPage-1].value && answers[currentPage-1].value !== 'Never' && answers[currentPage-1].value !== 'Not Applicable'}
+                <div in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+                  <div class="survey__subquestion" in:slide={{ duration: 300 }} out:slide={{ duration: 300 }}>
                     <p>{questions[currentPage-1].subQuestionText}</p>
                     {#each questions[currentPage-1].subQuestionOptText.split('/') as opt}
-                    <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
+                      <RadioButton label={opt} value={opt} group={answers[currentPage-1].subValue} on:click={() => handleSubChange(currentPage-1, opt)} />
                     {/each}
+                  </div>
                 </div>
-            </div>
-            {/if}
-            <div class="survey__navigation">
+              {/if}
+              <div class="survey__navigation">
                 {#if currentPage > 1}
-                <BackButton on:click={prevPage}>Back</BackButton>
+                  <BackButton on:click={prevPage}>Back</BackButton>
                 {/if}
                 <ContinueButton on:click={nextPage} disabled={!answers[currentPage-1].value}>Next</ContinueButton>
-            </div>
+              </div>
             {:else}
-            <h2 class="survey__subtitle">Review & Submit</h2>
-            <ContinueButton on:click={handleDynamicSubmit}>Submit</ContinueButton>
+              <h2 class="survey__subtitle">Review & Submit</h2>
+              <ContinueButton on:click={handleDynamicSubmit}>Submit</ContinueButton>
             {/if}
-        </div>
+          </div>
         {/key}
-    </div>
+      </div>
     {/if}
-    {/if}
+  {/if}
 </main>
 
 <style>
@@ -173,7 +187,11 @@ $: isForward = currentPage > previousPage;
 .survey__header-title {
     margin-bottom: 0.5rem;
 }
-
+  .download-message {
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
 .survey__progress-bar-container {
     width: 80vw;
     max-width: 600px;
