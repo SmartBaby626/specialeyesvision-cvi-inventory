@@ -18,6 +18,7 @@
   * TODO: Check compatibility with mobile (specifically touchscreen)
   * TODO: Create CNAME file
   * TODO: Host on GitHub Pages
+  * TODO: Remove DYC gap
 */
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
