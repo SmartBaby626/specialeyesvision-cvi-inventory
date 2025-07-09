@@ -89,7 +89,7 @@
     };
 
     await generatePDF(results);
-    await generateStrategiesPDF(results);
+    await generateStrategiesDOCX(results);
     surveyCompleted = true;
   }
 
@@ -157,177 +157,89 @@
       .save();
   }
 
-  async function generateStrategiesPDF(results) {
-    const html2pdf = (await import('html2pdf.js')).default;
-    const tempDiv = document.createElement('div');
-    
-    const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
-    const significantResponses = results.responses.filter(
-      response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
-    );
-    
-    const strategySections = [];
-    
-    for (const response of significantResponses) {
-      const questionText = response.questionText.replace(/\?$/, '').trim();
-      
-let strategyKeys;
+async function generateStrategiesDOCX(results) {
+  const htmlDocx = window.htmlDocx;
 
-if ((ageGroup === '4-8' && response.questionNum === 34) || 
-    (ageGroup === '9-12' && response.questionNum === 36)) {
-  
-  strategyKeys = [response.questionNum.toString()];
-
-  if (response.subAnswer) {
-    const optionNum = response.subAnswer.replace('Option', '').trim();
-    if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-    else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-    else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
-  }
-
-} else {
-  
-  strategyKeys = [response.questionNum.toString()];
-}
-
-      
-      const matchingStrategies = [];
-for (const key of strategyKeys) {
-  const strategiesForKey = strategies.filter(
-    strategy => strategy.questionNum.toString() === key
+  const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
+  const significantResponses = results.responses.filter(
+    response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
   );
 
-  if (strategiesForKey.length > 0) {
-    let customHeadingText = '';
+  const strategySections = [];
 
-    if (key === '341') {
-      customHeadingText = '34a. Boundaries that are new to them';
-    } else if (key === '342') {
-      customHeadingText = '34b. Boundaries that are well known to them';
-    } else if (key === '361') {
-      customHeadingText = '36a. Boundaries that are new to them';
-    } else if (key === '362') {
-      customHeadingText = '36b. Boundaries that are well known to them';
+  for (const response of significantResponses) {
+    const questionText = response.questionText.replace(/\?$/, '').trim();
+    let strategyKeys;
+
+    if ((ageGroup === '4-8' && response.questionNum === 34) ||
+        (ageGroup === '9-12' && response.questionNum === 36)) {
+
+      strategyKeys = [response.questionNum.toString()];
+
+      if (response.subAnswer) {
+        const optionNum = response.subAnswer.replace('Option', '').trim();
+        if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+        else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+        else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+      }
+
     } else {
-      customHeadingText = `${key}. ${questionText}`;
+      strategyKeys = [response.questionNum.toString()];
     }
 
-    strategySections.push(`
-      <div style="margin-bottom: 30px;">
-        <div style="margin-bottom: 10px; font-weight: bold;">
-          ${customHeadingText}
-        </div>
-        <ul style="list-style-type: none; padding-left: 0; margin-top: 10px; margin-bottom: 20px;">
-          ${strategiesForKey.map(strategy => `
-            <li style="margin-bottom: 12px; padding-left: 20px; position: relative; page-break-inside: avoid; break-inside: avoid;">
+    for (const key of strategyKeys) {
+      const strategiesForKey = strategies.filter(
+        s => s.questionNum.toString() === key
+      );
 
-              <span style="position: absolute; left: 0; top: 0;">•</span>
-              <div style="display: inline-block; width: 95%;">${strategy.strategyText}</div>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-      <div style="height: 1px; background: #e0e0e0; margin: 25px 0;"></div>
+      if (strategiesForKey.length > 0) {
+        let customHeadingText = '';
 
-    `);
-  }
-}
+        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+        else customHeadingText = `${key}. ${questionText}`;
 
+        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
 
-      
-      if (matchingStrategies.length > 0) {
         strategySections.push(`
-          <div style="
-            page-break-inside: avoid;
-            margin-bottom: 30px;
-          ">
-            <div style="margin-bottom: 10px; font-weight: bold;">
-              ${response.questionNum}. ${questionText}
-            </div>
-            <ul style="
-              list-style-type: none;
-              padding-left: 0;
-              margin-top: 10px;
-              margin-bottom: 20px;
-            ">
-              ${matchingStrategies.map(strategy => `
-                <li style="
-                  margin-bottom: 12px;
-                  position: relative;
-                  page-break-inside: avoid;
-                  break-inside: avoid;
-                ">
-                  <span style="
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                  ">•</span>
-                  <div style="margin-left: 20px;">${strategy.strategyText}</div>
-                </li>
-              `).join('')}
-            </ul>
+          <div>
+            <h3>${customHeadingText}</h3>
+            <ul>${items}</ul>
           </div>
-          <div style="
-            height: 1px;
-            background: #e0e0e0;
-            margin: 25px 0;
-            page-break-inside: avoid;
-          "></div>
         `);
       }
     }
-    
-    tempDiv.innerHTML = `
-      <div style="
-        font-family: Arial, sans-serif;
-        padding: 30px 20px;
-        max-width: 700px;
-        margin: 0 auto;
-      ">
-        <h1 style="
-          color: #530A7A; 
-          text-align: center; 
-          margin-bottom: 30px;
-          font-size: 24px;
-        ">
-          CVI Strategies Report
-        </h1>
-        
-        <div style="
-          margin-bottom: 30px;
-          padding-bottom: 15px;
-          border-bottom: 2px solid #530A7A;
-          page-break-inside: avoid;
-        ">
-          <p style="margin: 5px 0;"><strong>Age Group:</strong> ${results.ageGroup}</p>
-          <p style="margin: 5px 0;"><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-        </div>
-        
-        <div style="margin-top: 20px;">
-          ${strategySections.join('')}
-        </div>
-      </div>
-    `;
-
-    await html2pdf()
-      .set({
-        margin: 15,
-        filename: `CVI-Strategies-${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2,
-          logging: false,
-          useCORS: true
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      })
-      .from(tempDiv)
-      .save();
   }
+
+  const htmlString = `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          h1 { color: #530A7A; text-align: center; }
+          h3 { margin-top: 1.2em; color: #333; }
+          ul { margin: 0; padding-left: 1.2em; }
+          li { margin-bottom: 0.4em; }
+        </style>
+      </head>
+      <body>
+        <h1>CVI Strategies Report</h1>
+        <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+        <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+        ${strategySections.join('')}
+      </body>
+    </html>
+  `;
+
+  const converted = htmlDocx.asBlob(htmlString);
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(converted);
+  link.download = `CVI-Strategies-${new Date().toISOString().slice(0,10)}.docx`;
+  link.click();
+}
 window.quickPDFTest = async () => {
   const html2pdf = (await import('html2pdf.js')).default;
 
