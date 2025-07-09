@@ -65,10 +65,12 @@
     if (val === 'Never' || val === 'Not Applicable') {
       answers[idx].subValue = '';
     }
+    answers = answers;
   }
 
-  function handleSubChange(idx, val) {
-    answers[idx].subValue = val;
+  function handleSubChange(idx, option) {
+    answers[idx].subValue = option;
+    answers = answers;
   }
 
   async function handleDynamicSubmit() {
@@ -168,29 +170,73 @@
     for (const response of significantResponses) {
       const questionText = response.questionText.replace(/\?$/, '').trim();
       
-      // Handle main question strategies
-      let strategyKeys = [response.questionNum.toString()];
+let strategyKeys;
+
+if ((ageGroup === '4-8' && response.questionNum === 34) || 
+    (ageGroup === '9-12' && response.questionNum === 36)) {
+  
+  strategyKeys = [response.questionNum.toString()];
+
+  if (response.subAnswer) {
+    const optionNum = response.subAnswer.replace('Option', '').trim();
+    if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+    else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+    else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+  }
+
+} else {
+  
+  strategyKeys = [response.questionNum.toString()];
+}
+
       
-      // Handle special subquestions (34 for 4-8, 36 for 9-12)
-      if ((ageGroup === '4-8' && response.questionNum === 34) || 
-          (ageGroup === '9-12' && response.questionNum === 36)) {
-        
-        if (response.subAnswer) {
-          const optionNum = response.subAnswer.replace('Option', '').trim();
-          if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-          else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-          else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
-        }
-      }
-      
-      // Get all matching strategies
       const matchingStrategies = [];
-      for (const key of strategyKeys) {
-        const strategiesForKey = strategies.filter(strategy => 
-          strategy.questionNum.toString() === key
-        );
-        matchingStrategies.push(...strategiesForKey);
-      }
+for (const key of strategyKeys) {
+  const strategiesForKey = strategies.filter(strategy =>
+    strategy.questionNum.toString() === key
+  );
+
+  if (strategiesForKey.length > 0) {
+    strategySections.push(`
+      <div style="
+        page-break-inside: avoid;
+        margin-bottom: 30px;
+      ">
+        <div style="margin-bottom: 10px; font-weight: bold;">
+          ${key}. ${questionText}
+        </div>
+        <ul style="
+          list-style-type: none;
+          padding-left: 0;
+          margin-top: 10px;
+          margin-bottom: 20px;
+        ">
+          ${strategiesForKey.map(strategy => `
+            <li style="
+              margin-bottom: 12px;
+              padding-left: 20px;
+              position: relative;
+            ">
+              <span style="
+                position: absolute;
+                left: 0;
+                top: 0;
+              ">•</span>
+              <div style="display: inline-block; width: 95%;">${strategy.strategyText}</div>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      <div style="
+        height: 1px;
+        background: #e0e0e0;
+        margin: 25px 0;
+        page-break-inside: avoid;
+      "></div>
+    `);
+  }
+}
+
       
       if (matchingStrategies.length > 0) {
         strategySections.push(`
@@ -335,14 +381,21 @@
                 <div in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
                   <div class="survey__subquestion" in:slide={{ duration: 300 }} out:slide={{ duration: 300 }}>
                     <p>{questions[currentPage-1].subQuestionText}</p>
-                    {#each questions[currentPage-1].subQuestionOptText.split('/') as opt, i}
-                      <RadioButton 
-                        label={opt} 
-                        value={`Option ${i+1}`} 
-                        group={answers[currentPage-1].subValue} 
-                        on:click={() => handleSubChange(currentPage-1, `Option ${i+1}`)} 
-                      />
-                    {/each}
+                    <div class="radio-options">
+                      {#each questions[currentPage-1].subQuestionOptText.split('/') as opt, i}
+                        <div class="radio-option">
+                          <input
+                            type="radio"
+                            id="opt-{currentPage-1}-{i}"
+                            name="subquestion-{currentPage-1}"
+                            value="Option {i+1}"
+                            checked={answers[currentPage-1].subValue === `Option ${i+1}`}
+                            on:change={() => handleSubChange(currentPage-1, `Option ${i+1}`)}
+                          />
+                          <label for="opt-{currentPage-1}-{i}">{opt}</label>
+                        </div>
+                      {/each}
+                    </div>
                   </div>
                 </div>
               {/if}
@@ -351,7 +404,8 @@
                 {#if currentPage > 1}
                   <BackButton on:click={prevPage}>Back</BackButton>
                 {/if}
-                <ContinueButton on:click={nextPage} disabled={!answers[currentPage-1].value || 
+                <ContinueButton on:click={nextPage} 
+                  disabled={!answers[currentPage-1].value || 
                   (questions[currentPage-1].subQuestion === 'TRUE' && 
                   answers[currentPage-1].value !== 'Never' && 
                   answers[currentPage-1].value !== 'Not Applicable' && 
@@ -460,6 +514,26 @@
     margin-left: auto;
     margin-right: auto;
     padding: 0 1rem;
+  }
+
+  .radio-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .radio-option input[type="radio"] {
+    margin: 0;
+    width: 1.2rem;
+    height: 1.2rem;
   }
 
   .survey__navigation {
