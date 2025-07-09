@@ -192,50 +192,44 @@ if ((ageGroup === '4-8' && response.questionNum === 34) ||
       
       const matchingStrategies = [];
 for (const key of strategyKeys) {
-  const strategiesForKey = strategies.filter(strategy =>
-    strategy.questionNum.toString() === key
+  const strategiesForKey = strategies.filter(
+    strategy => strategy.questionNum.toString() === key
   );
 
   if (strategiesForKey.length > 0) {
+    let customHeadingText = '';
+
+    if (key === '341') {
+      customHeadingText = '34a. Boundaries that are new to them';
+    } else if (key === '342') {
+      customHeadingText = '34b. Boundaries that are well known to them';
+    } else if (key === '361') {
+      customHeadingText = '36a. Boundaries that are new to them';
+    } else if (key === '362') {
+      customHeadingText = '36b. Boundaries that are well known to them';
+    } else {
+      customHeadingText = `${key}. ${questionText}`;
+    }
+
     strategySections.push(`
-      <div style="
-        page-break-inside: avoid;
-        margin-bottom: 30px;
-      ">
+      <div style="page-break-inside: avoid; margin-bottom: 30px;">
         <div style="margin-bottom: 10px; font-weight: bold;">
-          ${key}. ${questionText}
+          ${customHeadingText}
         </div>
-        <ul style="
-          list-style-type: none;
-          padding-left: 0;
-          margin-top: 10px;
-          margin-bottom: 20px;
-        ">
+        <ul style="list-style-type: none; padding-left: 0; margin-top: 10px; margin-bottom: 20px;">
           ${strategiesForKey.map(strategy => `
-            <li style="
-              margin-bottom: 12px;
-              padding-left: 20px;
-              position: relative;
-            ">
-              <span style="
-                position: absolute;
-                left: 0;
-                top: 0;
-              ">•</span>
+            <li style="margin-bottom: 12px; padding-left: 20px; position: relative;">
+              <span style="position: absolute; left: 0; top: 0;">•</span>
               <div style="display: inline-block; width: 95%;">${strategy.strategyText}</div>
             </li>
           `).join('')}
         </ul>
       </div>
-      <div style="
-        height: 1px;
-        background: #e0e0e0;
-        margin: 25px 0;
-        page-break-inside: avoid;
-      "></div>
+      <div style="height: 1px; background: #e0e0e0; margin: 25px 0; page-break-inside: avoid;"></div>
     `);
   }
 }
+
 
       
       if (matchingStrategies.length > 0) {
