@@ -213,20 +213,22 @@ for (const key of strategyKeys) {
     }
 
     strategySections.push(`
-      <div style="page-break-inside: avoid; margin-bottom: 30px;">
+      <div style="margin-bottom: 30px;">
         <div style="margin-bottom: 10px; font-weight: bold;">
           ${customHeadingText}
         </div>
         <ul style="list-style-type: none; padding-left: 0; margin-top: 10px; margin-bottom: 20px;">
           ${strategiesForKey.map(strategy => `
-            <li style="margin-bottom: 12px; padding-left: 20px; position: relative;">
+            <li style="margin-bottom: 12px; padding-left: 20px; position: relative; page-break-inside: avoid; break-inside: avoid;">
+
               <span style="position: absolute; left: 0; top: 0;">•</span>
               <div style="display: inline-block; width: 95%;">${strategy.strategyText}</div>
             </li>
           `).join('')}
         </ul>
       </div>
-      <div style="height: 1px; background: #e0e0e0; margin: 25px 0; page-break-inside: avoid;"></div>
+      <div style="height: 1px; background: #e0e0e0; margin: 25px 0;"></div>
+
     `);
   }
 }
@@ -251,15 +253,16 @@ for (const key of strategyKeys) {
               ${matchingStrategies.map(strategy => `
                 <li style="
                   margin-bottom: 12px;
-                  padding-left: 20px;
                   position: relative;
+                  page-break-inside: avoid;
+                  break-inside: avoid;
                 ">
                   <span style="
                     position: absolute;
                     left: 0;
                     top: 0;
                   ">•</span>
-                  <div style="display: inline-block; width: 95%;">${strategy.strategyText}</div>
+                  <div style="margin-left: 20px;">${strategy.strategyText}</div>
                 </li>
               `).join('')}
             </ul>
