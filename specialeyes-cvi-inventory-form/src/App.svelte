@@ -328,6 +328,35 @@ for (const key of strategyKeys) {
       .from(tempDiv)
       .save();
   }
+window.quickPDFTest = async () => {
+  const html2pdf = (await import('html2pdf.js')).default;
+
+  const tempDiv = document.createElement('div');
+  tempDiv.style.fontFamily = 'Arial, sans-serif';
+  tempDiv.style.maxWidth = '800px';
+  tempDiv.style.margin = '0 auto';
+  tempDiv.style.padding = '20px';
+
+  tempDiv.innerHTML = `
+    <h1 style="color: #530A7A;">Test PDF Content</h1>
+    <p>This is a test paragraph. It should wrap nicely across multiple lines and pages. Repeat this paragraph to simulate a long document.</p>
+    ${'<p>More test text. Wrapping should be handled automatically by html2pdf. </p>'.repeat(50)}
+  `;
+
+  html2pdf().set({
+    margin: 10,
+    filename: `test-html2pdf.pdf`,
+    html2canvas: {
+      scale: 2,
+      logging: true
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    }
+  }).from(tempDiv).save();
+};
 
   $: isForward = currentPage > previousPage;
 </script>
