@@ -6,7 +6,7 @@
   * TODO: Test screen reader compatibility
   * // Fix radio buttons in subquestions so multiple options can't be selected
   * TODO: Add a loading spinner when generating PDFs
-  * TODO: Fix titles for questions being cut off between page
+  * // Fix titles for questions being cut off between page
   * TODO: Change "review and submit" to "submit"
   * // Show strategies for 34/36a and 34/36b questions
   * // Allow proceeding in the survey after selecting subquestion options
