@@ -1,16 +1,16 @@
 <script>
   /**
   * TODO: Increase spacing between title and progress bar
-  * TODO: Fix spacing between subquestion options
+  * // Fix spacing between subquestion options
   * TODO: Add quick variables
   * TODO: Test screen reader compatibility
-  * TODO: Fix radio buttons in subquestions so multiple options can't be selected
+  * // Fix radio buttons in subquestions so multiple options can't be selected
   * TODO: Add a loading spinner when generating PDFs
   * TODO: Fix titles for questions being cut off between page
   * TODO: Change "review and submit" to "submit"
-  * TODO: Show strategies for 34/36a and 34/36b questions
-  * TODO: Allow proceeding in the survey after selecting subquestion options
-  * TODO: Fix subquestion handling to display resuls in results PDF
+  * // Show strategies for 34/36a and 34/36b questions
+  * // Allow proceeding in the survey after selecting subquestion options
+  * TODO: Fix subquestion handling to display results in results PDF
   * TODO: Reformat the results PDF to use likert scale
   * TODO: Change favicon and page title
   * TODO: Update mobile device compatibility
