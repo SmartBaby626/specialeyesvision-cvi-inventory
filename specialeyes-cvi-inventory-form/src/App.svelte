@@ -19,6 +19,12 @@
   * TODO: Create CNAME file
   * TODO: Host on GitHub Pages
   * TODO: Remove DYC gap
+  * TODO: Add reCAPTCHA v3 for security
+  * TODO: Add name input
+  * TODO: Update PDF file names
+  * TODO: Remove automatic download
+  * TODO: Set up email address
+  * TODO: Set up email forwarding of results
 */
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
