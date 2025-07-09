@@ -315,7 +315,7 @@
         "subQuestionText": null
     },
     {
-        "DYC": "FALSE",
+        "DYC": "TRUE",
         "questionNum": 36,
         "questionText": "Find inside floor boundaries difficult to cross?",
         "subQuestion": "TRUE",
