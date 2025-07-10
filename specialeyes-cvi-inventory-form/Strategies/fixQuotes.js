@@ -1,7 +1,7 @@
-const fs = require('fs');
+import { readFileSync, writeFileSync } from 'node:fs';
 
 
-const data = JSON.parse(fs.readFileSync('strategiesAtHome9-12.json', 'utf8'));
+const data = JSON.parse(readFileSync('strategiesAtHome9-12.json', 'utf8'));
 
 
 function escapeInnerQuotes(value) {
@@ -30,6 +30,5 @@ function processJSON(obj) {
 
 const updated = processJSON(data);
 
-fs.writeFileSync('yourfile-fixed.json', JSON.stringify(updated, null, 2), 'utf8');
 
-console.log('Done! Fixed JSON saved as yourfile-fixed.json');
+writeFileSync('file-fixed.json', JSON.stringify(updated, null, 2), 'utf8');
