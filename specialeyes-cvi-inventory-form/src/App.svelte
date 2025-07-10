@@ -26,6 +26,7 @@
   * TODO: Set up email address
   * TODO: Set up email forwarding of results
   * // Add strategies at school
+  * TODO: Add intro page
 */
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
