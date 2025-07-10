@@ -243,6 +243,89 @@ async function generateStrategiesDOCX(results) {
   link.download = `CVI-Strategies-${new Date().toISOString().slice(0,10)}.docx`;
   link.click();
 }
+async function generateSchoolStrategiesDOCX(results) {
+  const htmlDocx = window.htmlDocx;
+
+  const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
+  const significantResponses = results.responses.filter(
+    response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
+  );
+
+  const strategySections = [];
+
+  for (const response of significantResponses) {
+    const questionText = response.questionText.replace(/\?$/, '').trim();
+    let strategyKeys;
+
+    if ((ageGroup === '4-8' && response.questionNum === 34) ||
+        (ageGroup === '9-12' && response.questionNum === 36)) {
+
+      strategyKeys = [response.questionNum.toString()];
+
+      if (response.subAnswer) {
+        const optionNum = response.subAnswer.replace('Option', '').trim();
+        if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+        else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+        else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+      }
+
+    } else {
+      strategyKeys = [response.questionNum.toString()];
+    }
+
+    for (const key of strategyKeys) {
+      const strategiesForKey = strategies.filter(
+        s => s.questionNum.toString() === key
+      );
+
+      if (strategiesForKey.length > 0) {
+        let customHeadingText = '';
+
+        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+        else customHeadingText = `${key}. ${questionText}`;
+
+        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+
+        strategySections.push(`
+          <div>
+            <h3>${customHeadingText}</h3>
+            <ul>${items}</ul>
+          </div>
+        `);
+      }
+    }
+  }
+
+  const htmlString = `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          h1 { color: #530A7A; text-align: center; }
+          h3 { margin-top: 1.2em; color: #333; }
+          ul { margin: 0; padding-left: 1.2em; }
+          li { margin-bottom: 0.4em; }
+        </style>
+      </head>
+      <body>
+        <h1>CVI Strategies Report (School)</h1>
+        <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+        <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+        ${strategySections.join('')}
+      </body>
+    </html>
+  `;
+
+  const converted = htmlDocx.asBlob(htmlString);
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(converted);
+  link.download = `CVI-Strategies-School-${new Date().toISOString().slice(0,10)}.docx`;
+  link.click();
+}
 window.quickPDFTest = async () => {
   const html2pdf = (await import('html2pdf.js')).default;
 
