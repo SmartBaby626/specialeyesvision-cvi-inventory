@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 
-const data = JSON.parse(readFileSync('strategiesAtHome9-12.json', 'utf8'));
+const data = JSON.parse(readFileSync('Strategies/strategiesAtHome9-12.json', 'utf8'));
 
 
 function escapeInnerQuotes(value) {
