@@ -12,7 +12,7 @@
   * // Allow proceeding in the survey after selecting subquestion options
   * TODO: Fix subquestion handling to display results in results PDF
   * TODO: Reformat the results PDF to use likert scale
-  * TODO: Change favicon and page title
+  * // Change favicon and page title
   * TODO: Update mobile device compatibility
   * TODO: Check compatibility with different browsers
   * TODO: Check compatibility with mobile (specifically touchscreen)
