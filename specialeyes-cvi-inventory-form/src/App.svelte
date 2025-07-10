@@ -15,7 +15,7 @@
   * // Change favicon and page title
   * TODO: Update mobile device compatibility
   * TODO: Check compatibility with different browsers
-  * TODO: Check compatibility with mobile (specifically touchscreen)
+  * // Check compatibility with mobile (specifically touchscreen)
   * TODO: Create CNAME file
   * TODO: Host on GitHub Pages
   * TODO: Remove DYC gap
