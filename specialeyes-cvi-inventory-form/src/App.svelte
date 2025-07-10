@@ -122,6 +122,8 @@ let childName = '';  // for your second name box
           <h2 style="color: #530A7A; border-bottom: 1px solid #eee; padding-bottom: 5px;">
             Participant Information
           </h2>
+          <p><strong>Name of Form User:</strong> ${results.participantName || 'N/A'}</p>
+          <p><strong>Child Name:</strong> ${results.childName || 'N/A'}</p>
           <p><strong>Age Group:</strong> ${results.ageGroup}</p>
         </div>
         
