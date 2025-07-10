@@ -23,7 +23,7 @@
   * // Add name input
   * // Update PDF file names
   * TODO: Remove automatic download
-  * TODO: Set up email address
+  * // Set up email address
   * TODO: Set up email forwarding of results
   * // Add strategies at school
   * TODO: Add intro page
@@ -40,7 +40,7 @@
   import strategiesAtSchool4_8 from '../Strategies/strategiesAtSchool4-8.json';
   import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
   import UserNameBox from './lib/UserNameBox.svelte';
-
+  import emailjs from '@emailjs/browser';
 
   let currentPage = 0;
   let previousPage = 0;
@@ -49,9 +49,9 @@
   let questions = [];
   let answers = [];
 let participantName = '';
-let childName = '';  // for your second name box
+let childName = ''; 
 
-
+emailjs.init('rKmNBfuJzzFX3Y0No'); 
   function selectAge(group) {
     ageGroup = group;
     questions = group === '4-8' ? questions4_8 : questions9_12;

@@ -10,13 +10,17 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.1.0",
+    "cypress": "^14.5.1",
     "svelte": "^5.34.7",
     "vite": "^7.0.0"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "fs": "^0.0.1-security",
     "html-docx-js": "^0.3.1",
     "html2pdf.js": "^0.10.3",
-    "jspdf": "^3.0.1"
+    "jspdf": "^3.0.1",
+    "mammoth": "^1.9.1",
+    "pdf-parse": "^1.1.1"
   }
 }
