@@ -38,6 +38,7 @@
   import strategiesAtHome9_12 from '../Strategies/strategiesAtHome9-12.json';
   import strategiesAtSchool4_8 from '../Strategies/strategiesAtSchool4-8.json';
   import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
+  import UserNameBox from './lib/UserNameBox.svelte';
 
 
   let currentPage = 0;
@@ -375,16 +376,13 @@ window.quickPDFTest = async () => {
   {:else}
     {#if currentPage === 0}
       <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
-      <div style="margin: 1rem 0;">
-  <label for="nameInput" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Participant Name</label>
-  <input
-    id="nameInput"
-    type="text"
-    bind:value={participantName}
-    placeholder="Enter name"
-    style="padding: 0.5rem; font-size: 1rem; width: 100%; max-width: 300px;"
-  />
+<div style="margin: 1rem 0;">
+  <label for="nameInput" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+    Participant Name
+  </label>
+  <UserNameBox bind:value={participantName} />
 </div>
+
 
       <div class="survey__question">Is your child:</div>
       <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
