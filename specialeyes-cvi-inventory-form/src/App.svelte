@@ -7,7 +7,7 @@
   * // Fix radio buttons in subquestions so multiple options can't be selected
   * TODO: Add a loading spinner when generating PDFs
   * // Fix titles for questions being cut off between page
-  * TODO: Change "review and submit" to "submit"
+  * // Change "review and submit" to "submit"
   * // Show strategies for 34/36a and 34/36b questions
   * // Allow proceeding in the survey after selecting subquestion options
   * TODO: Fix subquestion handling to display results in results PDF
@@ -22,9 +22,9 @@
   * TODO: Add reCAPTCHA v3 for security
   * // Add name input
   * // Update PDF file names
-  * // TODO: Remove automatic download
+  * // Remove automatic download
   * // Set up email address
-  * // TODO: Set up email forwarding of results
+  * // Set up email forwarding of results
   * // Add strategies at school
   * TODO: Add intro page
 */
@@ -520,7 +520,7 @@ window.quickPDFTest = async () => {
                 </ContinueButton>
               </div>
             {:else}
-              <h2 class="survey__subtitle">Review & Submit</h2>
+              <h2 class="survey__subtitle">Submit</h2>
               <ContinueButton on:click={handleDynamicSubmit}>Submit</ContinueButton>
             {/if}
           </div>
