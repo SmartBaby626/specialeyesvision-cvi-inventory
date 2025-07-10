@@ -411,7 +411,12 @@ window.quickPDFTest = async () => {
         <RadioButton label="4-8 Years Old" value="4-8" bind:group={ageGroup} />
         <RadioButton label="9-12 Years Old" value="9-12" bind:group={ageGroup} />
       </div>
-      <ContinueButton on:click={() => selectAge(ageGroup)} disabled={!ageGroup}>Next</ContinueButton>
+<ContinueButton 
+  on:click={() => selectAge(ageGroup)}
+  disabled={!ageGroup || participantName.trim() === '' || childName.trim() === ''}>
+  Next
+</ContinueButton>
+
     {/if}
 
     {#if ageGroup && currentPage > 0}
