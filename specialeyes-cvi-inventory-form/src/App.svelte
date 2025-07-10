@@ -84,6 +84,8 @@ let childName = '';  // for your second name box
   async function handleDynamicSubmit() {
     const results = {
       ageGroup,
+      participantName,
+      childName,
       responses: questions.map((q, idx) => ({
         questionNum: q.questionNum,
         questionText: q.questionText,
