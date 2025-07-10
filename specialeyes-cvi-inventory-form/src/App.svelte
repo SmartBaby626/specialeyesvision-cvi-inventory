@@ -48,6 +48,8 @@
   let questions = [];
   let answers = [];
 let participantName = '';
+let childName = '';  // for your second name box
+
 
   function selectAge(group) {
     ageGroup = group;
@@ -376,11 +378,20 @@ window.quickPDFTest = async () => {
   {:else}
     {#if currentPage === 0}
       <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
-<div style="margin: 1rem 0;">
+      <div>
+<div style="display: inline-block; margin: 1rem 0;">
   <label for="nameInput" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
-    Participant Name
+    Your Name
   </label>
   <UserNameBox bind:value={participantName} />
+</div>
+
+<div style="display: inline-block; margin: 1rem 0;">
+  <label for="nameInput2" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+    Name of Child
+  </label>
+  <UserNameBox bind:value={childName} />
+</div>
 </div>
 
 
