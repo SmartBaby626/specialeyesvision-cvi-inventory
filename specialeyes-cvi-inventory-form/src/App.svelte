@@ -25,7 +25,7 @@
   * TODO: Remove automatic download
   * TODO: Set up email address
   * TODO: Set up email forwarding of results
-  * TODO: Add strategies at school
+  * // Add strategies at school
 */
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
@@ -46,6 +46,7 @@
   let ageGroup = null;
   let questions = [];
   let answers = [];
+let participantName = '';
 
   function selectAge(group) {
     ageGroup = group;
@@ -374,6 +375,17 @@ window.quickPDFTest = async () => {
   {:else}
     {#if currentPage === 0}
       <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
+      <div style="margin: 1rem 0;">
+  <label for="nameInput" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Participant Name</label>
+  <input
+    id="nameInput"
+    type="text"
+    bind:value={participantName}
+    placeholder="Enter name"
+    style="padding: 0.5rem; font-size: 1rem; width: 100%; max-width: 300px;"
+  />
+</div>
+
       <div class="survey__question">Is your child:</div>
       <div style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
         <RadioButton label="4-8 Years Old" value="4-8" bind:group={ageGroup} />
