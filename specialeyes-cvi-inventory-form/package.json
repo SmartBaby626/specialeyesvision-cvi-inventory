@@ -21,6 +21,7 @@
     "html2pdf.js": "^0.10.3",
     "jspdf": "^3.0.1",
     "mammoth": "^1.9.1",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "resend": "^4.6.0"
   }
 }

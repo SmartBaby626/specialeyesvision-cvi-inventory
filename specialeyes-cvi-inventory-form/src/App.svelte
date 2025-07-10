@@ -13,8 +13,8 @@
   * TODO: Fix subquestion handling to display results in results PDF
   * TODO: Reformat the results PDF to use likert scale
   * // Change favicon and page title
-  * TODO: Update mobile device compatibility
-  * TODO: Check compatibility with different browsers
+  * // Update mobile device compatibility
+  * // Check compatibility with different browsers
   * // Check compatibility with mobile (specifically touchscreen)
   * TODO: Create CNAME file
   * TODO: Host on GitHub Pages
@@ -22,9 +22,9 @@
   * TODO: Add reCAPTCHA v3 for security
   * // Add name input
   * // Update PDF file names
-  * TODO: Remove automatic download
+  * // TODO: Remove automatic download
   * // Set up email address
-  * TODO: Set up email forwarding of results
+  * // TODO: Set up email forwarding of results
   * // Add strategies at school
   * TODO: Add intro page
 */
@@ -50,8 +50,15 @@
   let answers = [];
 let participantName = '';
 let childName = ''; 
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 
-emailjs.init('rKmNBfuJzzFX3Y0No'); 
   function selectAge(group) {
     ageGroup = group;
     questions = group === '4-8' ? questions4_8 : questions9_12;
@@ -98,9 +105,24 @@ emailjs.init('rKmNBfuJzzFX3Y0No');
       }))
     };
 
-    await generatePDF(results);
-    await generateStrategiesDOCX(results);
-    await generateSchoolStrategiesDOCX(results);
+const pdfBase64 = await generatePDF(results);
+const docxBase64 = await generateStrategiesDOCX(results);
+const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+
+    await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    participantName: results.participantName,
+    childName: results.childName,
+    ageGroup: results.ageGroup,
+    pdfBase64,
+    docxBase64,
+    schoolDocxBase64,
+    email: 'addytwhite@icloud.com', // replace or make dynamic!
+  }),
+});
+
     surveyCompleted = true;
   }
 function safeFileName(name) {
@@ -173,8 +195,28 @@ function safeFileName(name) {
           orientation: 'portrait'
         }
       })
-      .from(tempDiv)
-      .save();
+const blob = await html2pdf()
+      .set({
+        margin: 15,
+        filename: safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`),
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          logging: false,
+          letterRendering: true,
+          useCORS: true
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      })
+  .from(tempDiv)
+  .outputPdf('blob');
+
+const pdfBase64 = await blobToBase64(blob);
+return pdfBase64;
   }
 
 async function generateStrategiesDOCX(results) {
@@ -255,10 +297,10 @@ async function generateStrategiesDOCX(results) {
 
   const converted = htmlDocx.asBlob(htmlString);
 
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(converted);
-  link.download = safeFileName(`CVI-Inventory-Strategies-at-Home-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-  link.click();
+const docxBlob = converted;
+const docxBase64 = await blobToBase64(docxBlob);
+return docxBase64;
+
 }
 async function generateSchoolStrategiesDOCX(results) {
   const htmlDocx = window.htmlDocx;
@@ -338,10 +380,10 @@ async function generateSchoolStrategiesDOCX(results) {
 
   const converted = htmlDocx.asBlob(htmlString);
 
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(converted);
-  link.download = safeFileName(`CVI-Inventory-Strategies-at-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-  link.click();
+const docxBlob = converted;
+const docxBase64 = await blobToBase64(docxBlob);
+return docxBase64;
+
 }
 window.quickPDFTest = async () => {
   const html2pdf = (await import('html2pdf.js')).default;
