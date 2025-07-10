@@ -12,7 +12,9 @@
 <style>
   .scale {
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
     margin-bottom: 1rem;
   }
 
@@ -20,5 +22,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 80px;          
+    flex: 1 1 auto;          
+    text-align: center;
   }
 </style>

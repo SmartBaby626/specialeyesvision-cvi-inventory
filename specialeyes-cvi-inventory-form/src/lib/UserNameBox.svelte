@@ -14,7 +14,7 @@
   .input {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
     font-weight: 500;
-    font-size: .8vw;
+    font-size: clamp(14px, 4vw, 18px); 
     color: #530A7A;
     background-color: rgb(255,255,255);
     box-shadow: 0 0 .4vw rgba(0,0,0,0.5), 0 0 0 .15vw transparent;
@@ -22,8 +22,10 @@
     border: none;
     outline: none;
     padding: 0.4vw;
-    max-width: 190px;
+    max-width: 300px;
     transition: .4s;
+    width: 100%;  
+    box-sizing: border-box;
   }
 
   .input:hover {
