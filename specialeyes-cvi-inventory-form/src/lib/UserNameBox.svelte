@@ -6,7 +6,7 @@
   type="text"
   name="text"
   class="input"
-  placeholder="Enter your name"
+  placeholder="Enter name"
   bind:value
 />
 
