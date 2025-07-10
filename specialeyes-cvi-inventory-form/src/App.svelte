@@ -36,6 +36,9 @@
   import questions9_12 from '../Questions/questions9-12.json';
   import strategiesAtHome4_8 from '../Strategies/strategiesAtHome4-8.json';
   import strategiesAtHome9_12 from '../Strategies/strategiesAtHome9-12.json';
+  import strategiesAtSchool4_8 from '../Strategies/strategiesAtSchool4-8.json';
+  import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
+
 
   let currentPage = 0;
   let previousPage = 0;
