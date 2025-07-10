@@ -102,7 +102,14 @@ let childName = '';  // for your second name box
     await generateSchoolStrategiesDOCX(results);
     surveyCompleted = true;
   }
-
+function safeFileName(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')      // spaces to dashes
+    .replace(/[^a-z0-9-_]/g, '') // remove weird characters except dash & underscore
+    || 'anonymous';            // fallback if it ends up empty
+}
   async function generatePDF(results) {
     const html2pdf = (await import('html2pdf.js')).default;
     const tempDiv = document.createElement('div');
@@ -151,7 +158,7 @@ let childName = '';  // for your second name box
     await html2pdf()
       .set({
         margin: 15,
-        filename: `CVI-Survey-Results-${new Date().toISOString().slice(0,10)}.pdf`,
+        filename: safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`),
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
           scale: 2,
@@ -249,7 +256,7 @@ async function generateStrategiesDOCX(results) {
 
   const link = document.createElement('a');
   link.href = URL.createObjectURL(converted);
-  link.download = `CVI-Strategies-${new Date().toISOString().slice(0,10)}.docx`;
+  link.download = safeFileName(`CVI-Inventory-Strategies-at-Home-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
   link.click();
 }
 async function generateSchoolStrategiesDOCX(results) {
@@ -332,7 +339,7 @@ async function generateSchoolStrategiesDOCX(results) {
 
   const link = document.createElement('a');
   link.href = URL.createObjectURL(converted);
-  link.download = `CVI-Strategies-School-${new Date().toISOString().slice(0,10)}.docx`;
+  link.download = safeFileName(`CVI-Inventory-Strategies-at-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
   link.click();
 }
 window.quickPDFTest = async () => {
