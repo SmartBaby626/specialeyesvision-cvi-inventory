@@ -93,6 +93,7 @@
 
     await generatePDF(results);
     await generateStrategiesDOCX(results);
+    await generateSchoolStrategiesDOCX(results);
     surveyCompleted = true;
   }
 
