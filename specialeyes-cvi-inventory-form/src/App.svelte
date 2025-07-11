@@ -101,8 +101,7 @@ async function blobToBase64(blob) {
         answer: answers[idx].value,
         ...(q.subQuestion === 'TRUE' && {
           subQuestionText: q.subQuestionText,
-          subAnswer: answers[idx].subValue,
-          recaptchaToken: token
+          subAnswer: answers[idx].subValue
         })
       }))
     };
@@ -121,7 +120,8 @@ const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
     pdfBase64,
     docxBase64,
     schoolDocxBase64,
-    email: 'addytwhite@icloud.com', 
+    email: 'addytwhite@icloud.com',
+    recaptchaToken: token
   }),
 });
 
