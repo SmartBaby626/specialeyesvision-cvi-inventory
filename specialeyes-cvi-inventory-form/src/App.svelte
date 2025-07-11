@@ -491,7 +491,7 @@ window.quickPDFTest = async () => {
     </div>
   {:else}
     {#if currentPage === 0}
-    <img style="width: 30%" src="./public/SE-Logo-PurpleTransparent.png" alt="Special Eyes Vision Services Logo"/>
+    <img style="width: 30%"href="/SE-Logo-PurpleTransparent.png" alt="Special Eyes Vision Services Logo"/>
       <h1 style="color: #530A7A" class="survey__title">Special Eyes Vision Services CVI Inventory Form</h1>
       <div>
 <div style="display: inline-block; margin: 1rem 0;">
