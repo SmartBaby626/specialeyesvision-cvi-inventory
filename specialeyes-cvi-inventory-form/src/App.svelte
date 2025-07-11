@@ -50,6 +50,22 @@
   let answers = [];
 let participantName = '';
 let childName = ''; 
+let recaptchaV2Passed = false;
+let showRecaptchaV2 = false;
+function loadRecaptchaV2() {
+  if (document.getElementById('recaptcha-v2-script')) return;
+  const script = document.createElement('script');
+  script.id = 'recaptcha-v2-script';
+  script.src = 'https://www.google.com/recaptcha/api.js';
+  script.async = true;
+  script.defer = true;
+  document.body.appendChild(script);
+}
+window.onRecaptchaV2Success = (token) => {
+  window.recaptchaV2Token = token;
+  recaptchaV2Passed = true;
+  handleDynamicSubmit();
+};
 async function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -89,44 +105,62 @@ async function blobToBase64(blob) {
     answers = answers;
   }
 
-  async function handleDynamicSubmit() {
-    const token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-    const results = {
-      ageGroup,
-      participantName,
-      childName,
-      responses: questions.map((q, idx) => ({
-        questionNum: q.questionNum,
-        questionText: q.questionText,
-        answer: answers[idx].value,
-        ...(q.subQuestion === 'TRUE' && {
-          subQuestionText: q.subQuestionText,
-          subAnswer: answers[idx].subValue
-        })
-      }))
-    };
+async function handleDynamicSubmit() {
+  let token;
 
-const pdfBase64 = await generatePDF(results);
-const docxBase64 = await generateStrategiesDOCX(results);
-const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
-
-    await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    participantName: results.participantName,
-    childName: results.childName,
-    ageGroup: results.ageGroup,
-    pdfBase64,
-    docxBase64,
-    schoolDocxBase64,
-    email: 'addytwhite@icloud.com',
-    recaptchaToken: token
-  }),
-});
-
-    surveyCompleted = true;
+  if (recaptchaV2Passed) {
+    token = window.recaptchaV2Token; // Will be set by the v2 callback
+  } else {
+    token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
   }
+
+  const results = {
+    ageGroup,
+    participantName,
+    childName,
+    responses: questions.map((q, idx) => ({
+      questionNum: q.questionNum,
+      questionText: q.questionText,
+      answer: answers[idx].value,
+      ...(q.subQuestion === 'TRUE' && {
+        subQuestionText: q.subQuestionText,
+        subAnswer: answers[idx].subValue
+      })
+    }))
+  };
+
+
+  const pdfBase64 = await generatePDF(results);
+  const docxBase64 = await generateStrategiesDOCX(results);
+  const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+
+  const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      participantName: results.participantName,
+      childName: results.childName,
+      ageGroup: results.ageGroup,
+      pdfBase64,
+      docxBase64,
+      schoolDocxBase64,
+      email: 'addytwhite@icloud.com',
+      recaptchaToken: token
+    }),
+  });
+
+  if (res.status === 403 && !recaptchaV2Passed) {
+    // fallback if v3 fails
+    showRecaptchaV2 = true;
+    loadRecaptchaV2();
+  } else if (res.ok) {
+    surveyCompleted = true;
+  } else {
+    console.error(await res.text());
+  }
+}
+
+
 function safeFileName(name) {
   return name
     .trim()
@@ -530,6 +564,16 @@ window.quickPDFTest = async () => {
       </div>
     {/if}
   {/if}
+  {#if showRecaptchaV2}
+  <div id="recaptcha-v2" style="margin: 2rem auto;">
+    <div
+      class="g-recaptcha"
+      data-sitekey="6LdREH8rAAAAANVJX3q3hClHuvxs_kyaVOmMRtTI"
+      data-callback="onRecaptchaV2Success">
+    </div>
+  </div>
+{/if}
+
 </main>
 
 <style>
