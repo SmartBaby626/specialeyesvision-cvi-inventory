@@ -143,6 +143,10 @@ async function handleDynamicSubmit() {
   const pdfBase64 = await generatePDF(results);
   const docxBase64 = await generateStrategiesDOCX(results);
   const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+  const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
+  const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+  const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+
 
   const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
     method: 'POST',
@@ -152,8 +156,11 @@ async function handleDynamicSubmit() {
       childName: results.childName,
       ageGroup: results.ageGroup,
       pdfBase64,
+      pdfFilename,       
       docxBase64,
+      docxFilename,       
       schoolDocxBase64,
+      schoolDocxFilename, 
       email: 'addytwhite@icloud.com',
       recaptchaToken: token
     }),
