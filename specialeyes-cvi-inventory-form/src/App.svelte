@@ -1,32 +1,39 @@
 <script>
   /**
+  * TODO: Fix subquestion handling to display results in results PDF
+  * TODO: Reformat the results PDF to use likert scale
+  * TODO: Remove DYC gap
+  * TODO: Add email html
+  * TODO: Make sure email is sent with correct data
+  * TODO: Switch to mums email
+  * TODO: Complete survey on mobile
+  * TODO: Double check everything works
+  * TODO: Neaten up code
+  * TODO: CELEBRATE!
   * // Increase spacing between title and progress bar
   * // Fix spacing between subquestion options
-  * TODO: Add quick variables
+  * // Add quick variables
   * // Test screen reader compatibility
   * // Fix radio buttons in subquestions so multiple options can't be selected
-  * TODO: Add a loading spinner when generating PDFs
+  * // Add a loading spinner when generating PDFs
   * // Fix titles for questions being cut off between page
   * // Change "review and submit" to "submit"
   * // Show strategies for 34/36a and 34/36b questions
   * // Allow proceeding in the survey after selecting subquestion options
-  * TODO: Fix subquestion handling to display results in results PDF
-  * TODO: Reformat the results PDF to use likert scale
   * // Change favicon and page title
   * // Update mobile device compatibility
   * // Check compatibility with different browsers
   * // Check compatibility with mobile (specifically touchscreen)
   * // Create CNAME file
   * // Host on GitHub Pages
-  * TODO: Remove DYC gap
-  * TODO: Add reCAPTCHA v3 for security
+  * // Add reCAPTCHA v3 for security
   * // Add name input
   * // Update PDF file names
   * // Remove automatic download
   * // Set up email address
   * // Set up email forwarding of results
   * // Add strategies at school
-  * TODO: Add intro page
+  * // Add intro page
 */
   import LikertScale from './lib/LikertScale.svelte';
   import RadioButton from './lib/RadioButton.svelte';
@@ -484,7 +491,8 @@ window.quickPDFTest = async () => {
     </div>
   {:else}
     {#if currentPage === 0}
-      <h1 class="survey__title">Specialeyes Vision CVI Inventory Survey</h1>
+    <img style="width: 30%" src="./public/SE-Logo-PurpleTransparent.png" alt="Special Eyes Vision Services Logo"/>
+      <h1 style="color: #530A7A" class="survey__title">Special Eyes Vision Services CVI Inventory Form</h1>
       <div>
 <div style="display: inline-block; margin: 1rem 0;">
   <label for="nameInput" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
