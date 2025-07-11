@@ -474,11 +474,6 @@ window.quickPDFTest = async () => {
     <div class="thank-you">
       <h1 class="survey__title">Thank You!</h1>
       <p>Your responses have been recorded.</p>
-      <p class="download-notice">Two reports have been downloaded to your device:</p>
-      <ul class="report-list">
-        <li>CVI Survey Results</li>
-        <li>CVI Strategies Report</li>
-      </ul>
     </div>
   {:else}
     {#if currentPage === 0}
