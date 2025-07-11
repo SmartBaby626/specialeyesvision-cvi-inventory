@@ -90,7 +90,7 @@ async function blobToBase64(blob) {
   }
 
   async function handleDynamicSubmit() {
-    const token = await grecaptcha.execute('6LfwCn8rAAAAAJjVPi5hGA7QkgcONAT8LcNEmpyt', { action: 'submit' });
+    const token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
     const results = {
       ageGroup,
       participantName,
