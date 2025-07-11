@@ -1,9 +1,9 @@
 <script>
   /**
-  * TODO: Increase spacing between title and progress bar
+  * // Increase spacing between title and progress bar
   * // Fix spacing between subquestion options
   * TODO: Add quick variables
-  * TODO: Test screen reader compatibility
+  * // Test screen reader compatibility
   * // Fix radio buttons in subquestions so multiple options can't be selected
   * TODO: Add a loading spinner when generating PDFs
   * // Fix titles for questions being cut off between page
@@ -119,7 +119,7 @@ const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
     pdfBase64,
     docxBase64,
     schoolDocxBase64,
-    email: 'addytwhite@icloud.com', // replace or make dynamic!
+    email: 'addytwhite@icloud.com', 
   }),
 });
 
@@ -129,9 +129,9 @@ function safeFileName(name) {
   return name
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, '-')      // spaces to dashes
-    .replace(/[^a-z0-9-_]/g, '') // remove weird characters except dash & underscore
-    || 'anonymous';            // fallback if it ends up empty
+    .replace(/\s+/g, '-')     
+    .replace(/[^a-z0-9-_]/g, '') 
+    || 'anonymous';           
 }
   async function generatePDF(results) {
     const html2pdf = (await import('html2pdf.js')).default;
@@ -464,7 +464,7 @@ window.quickPDFTest = async () => {
 
     {#if ageGroup && currentPage > 0}
       <header class="survey__header">
-        <span class="survey__header-title">Special Eyes Vision Services CVI Inventory Form</span>
+        <span class="survey__header-title" style="margin-bottom: 9px">Special Eyes Vision Services CVI Inventory Form</span>
         <div class="survey__progress-bar-container">
           <div class="survey__progress-bar" style="width: {Math.round((currentPage/questions.length)*100)}%"></div>
         </div>
