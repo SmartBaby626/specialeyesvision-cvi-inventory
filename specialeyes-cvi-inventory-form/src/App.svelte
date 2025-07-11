@@ -17,7 +17,7 @@
   * // Check compatibility with different browsers
   * // Check compatibility with mobile (specifically touchscreen)
   * // Create CNAME file
-  * TODO: Host on GitHub Pages
+  * // Host on GitHub Pages
   * TODO: Remove DYC gap
   * TODO: Add reCAPTCHA v3 for security
   * // Add name input
@@ -90,6 +90,7 @@ async function blobToBase64(blob) {
   }
 
   async function handleDynamicSubmit() {
+    const token = await grecaptcha.execute('6LfwCn8rAAAAAJjVPi5hGA7QkgcONAT8LcNEmpyt', { action: 'submit' });
     const results = {
       ageGroup,
       participantName,
@@ -100,7 +101,8 @@ async function blobToBase64(blob) {
         answer: answers[idx].value,
         ...(q.subQuestion === 'TRUE' && {
           subQuestionText: q.subQuestionText,
-          subAnswer: answers[idx].subValue
+          subAnswer: answers[idx].subValue,
+          recaptchaToken: token
         })
       }))
     };
