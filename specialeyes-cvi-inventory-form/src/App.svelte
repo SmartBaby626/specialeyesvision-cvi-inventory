@@ -41,7 +41,8 @@
   import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
   import UserNameBox from './lib/UserNameBox.svelte';
   import emailjs from '@emailjs/browser';
-
+  import Loader from './lib/Loader.svelte';
+  let isSubmitting = false;
   let currentPage = 0;
   let previousPage = 0;
   let surveyCompleted = false;
@@ -115,9 +116,10 @@ async function blobToBase64(blob) {
 
 async function handleDynamicSubmit() {
   let token;
-
+   isSubmitting = true;
+   try {
   if (recaptchaV2Passed) {
-    token = window.recaptchaV2Token; // Will be set by the v2 callback
+    token = window.recaptchaV2Token;
   } else {
     token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
   }
@@ -158,7 +160,6 @@ async function handleDynamicSubmit() {
   });
 
   if (res.status === 403 && !recaptchaV2Passed) {
-    // fallback if v3 fails
     showRecaptchaV2 = true;
     loadRecaptchaV2();
   } else if (res.ok) {
@@ -166,6 +167,10 @@ async function handleDynamicSubmit() {
   } else {
     console.error(await res.text());
   }
+    } finally {
+    isSubmitting = false;
+  }
+
 }
 
 
@@ -463,7 +468,9 @@ window.quickPDFTest = async () => {
 </script>
 
 <main class="survey">
-  {#if surveyCompleted}
+  {#if isSubmitting}
+    <Loader />
+  {:else if surveyCompleted}
     <div class="thank-you">
       <h1 class="survey__title">Thank You!</h1>
       <p>Your responses have been recorded.</p>
