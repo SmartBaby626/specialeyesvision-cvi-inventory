@@ -52,6 +52,14 @@ let participantName = '';
 let childName = ''; 
 let recaptchaV2Passed = false;
 let showRecaptchaV2 = false;
+import { onMount } from 'svelte';
+onMount(() => {
+  grecaptcha.ready(() => {
+    grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
+      .then(token => console.log('Preloaded:', token));
+  });
+});
+
 function loadRecaptchaV2() {
   if (document.getElementById('recaptcha-v2-script')) return;
   const script = document.createElement('script');
