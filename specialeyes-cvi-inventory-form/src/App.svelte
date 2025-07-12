@@ -67,6 +67,16 @@ onMount(() => {
       .then(token => console.log('Preloaded:', token));
   });
 });
+function getSubLabel(response) {
+  if (!response.subAnswer) return '';
+  const question = questions.find(q => q.questionNum === response.questionNum);
+  if (!question || !question.subQuestionOptText) return response.subAnswer;
+
+  const options = question.subQuestionOptText.split('/');
+  const optionIndex = parseInt(response.subAnswer.replace('Option ', '')) - 1;
+
+  return options[optionIndex] || response.subAnswer;
+}
 
 function loadRecaptchaV2() {
   if (document.getElementById('recaptcha-v2-script')) return;
@@ -230,12 +240,13 @@ function safeFileName(name) {
             <h3 style="color: #530A7A;">Question ${response.questionNum}</h3>
             <p style="font-weight: bold;">${response.questionText}</p>
             <p><strong>Response:</strong> ${response.answer}</p>
-            ${response.subAnswer ? `
-              <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #530A7A;">
-                <p><strong>Follow-up:</strong> ${response.subQuestionText}</p>
-                <p><strong>Answer:</strong> ${response.subAnswer}</p>
-              </div>
-            ` : ''}
+          ${response.subAnswer ? `
+            <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #530A7A;">
+              <p><strong>Follow-up:</strong> ${response.subQuestionText}</p>
+              <p><strong>Answer:</strong> ${getSubLabel(response)}</p>
+            </div>
+          ` : ''}
+
           </div>
         `).join('')}
       </div>
