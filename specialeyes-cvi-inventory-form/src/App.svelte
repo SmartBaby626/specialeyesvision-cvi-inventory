@@ -132,7 +132,6 @@ async function blobToBase64(blob) {
   }
 
 async function handleDynamicSubmit() {
-  
   let token;
    isSubmitting = true;
    try {
@@ -166,35 +165,24 @@ async function handleDynamicSubmit() {
   const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
 
 
-const body = JSON.stringify({
-  participantName: results.participantName,
-  childName: results.childName,
-  ageGroup: results.ageGroup,
-  pdfBase64,
-  pdfFilename,       
-  docxBase64,
-  docxFilename,       
-  schoolDocxBase64,
-  schoolDocxFilename, 
-  email: 'addytwhite@icloud.com',
-  recaptchaToken: token
-});
-
-console.log('About to POST to backend');
-console.log('Payload length:', body.length);
-console.log('Body keys:', Object.keys(JSON.parse(body)));
-console.log('recaptchaToken:', token);
-
-const res = await fetch(
-  'https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail',
-  {
+  const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body
-  }
-);
-
-  console.log('Payload length:', body.length);
+    body: JSON.stringify({
+      participantName: results.participantName,
+      childName: results.childName,
+      ageGroup: results.ageGroup,
+      pdfBase64,
+      pdfFilename,       
+      docxBase64,
+      docxFilename,       
+      schoolDocxBase64,
+      schoolDocxFilename, 
+      email: 'addytwhite@icloud.com',
+      recaptchaToken: token
+    }),
+  });
+  
 
   if (res.status === 403 && !recaptchaV2Passed) {
     showRecaptchaV2 = true;
