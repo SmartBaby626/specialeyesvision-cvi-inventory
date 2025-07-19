@@ -47,8 +47,8 @@
   import strategiesAtSchool4_8 from '../Strategies/strategiesAtSchool4-8.json';
   import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
   import UserNameBox from './lib/UserNameBox.svelte';
-  import emailjs from '@emailjs/browser';
   import Loader from './lib/Loader.svelte';
+  
   let isSubmitting = false;
   let currentPage = 0;
   let previousPage = 0;
@@ -56,50 +56,91 @@
   let ageGroup = null;
   let questions = [];
   let answers = [];
-let participantName = '';
-let childName = ''; 
-let recaptchaV2Passed = false;
-let showRecaptchaV2 = false;
-import { onMount } from 'svelte';
-onMount(() => {
-  grecaptcha.ready(() => {
-    grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
-      .then(token => console.log('Preloaded:', token));
+  let participantName = '';
+  let childName = '';
+  let recaptchaV2Passed = false;
+  let showRecaptchaV2 = false;
+  let isIOS = false;
+  let recaptchaLoaded = false;
+  
+  import { onMount } from 'svelte';
+  onMount(() => {
+    isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    console.log('Running on iOS:', isIOS);
+    console.log('User Agent:', navigator.userAgent);
+    
+    document.addEventListener('click', loadRecaptcha, { once: true });
   });
-});
-function getSubLabel(response) {
-  if (!response.subAnswer) return '';
-  const question = questions.find(q => q.questionNum === response.questionNum);
-  if (!question || !question.subQuestionOptText) return response.subAnswer;
+  
+  async function loadRecaptcha() {
+    if (recaptchaLoaded) return;
+    
+    try {
+      await loadScript('/lib/recaptcha.js');
+      
+      grecaptcha.ready(() => {
+        grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
+          .then(token => console.log('reCAPTCHA preloaded:', token))
+          .catch(err => console.error('reCAPTCHA preload error:', err));
+      });
+      
+      recaptchaLoaded = true;
+    } catch (e) {
+      console.error('reCAPTCHA load failed:', e);
+    }
+  }
+  
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) return resolve();
+      
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+  
+  function getSubLabel(response) {
+    if (!response.subAnswer) return '';
+    const question = questions.find(q => q.questionNum === response.questionNum);
+    if (!question || !question.subQuestionOptText) return response.subAnswer;
 
-  const options = question.subQuestionOptText.split('/');
-  const optionIndex = parseInt(response.subAnswer.replace('Option ', '')) - 1;
+    const options = question.subQuestionOptText.split('/');
+    const optionIndex = parseInt(response.subAnswer.replace('Option ', '')) - 1;
 
-  return options[optionIndex] || response.subAnswer;
-}
+    return options[optionIndex] || response.subAnswer;
+  }
 
-function loadRecaptchaV2() {
-  if (document.getElementById('recaptcha-v2-script')) return;
-  const script = document.createElement('script');
-  script.id = 'recaptcha-v2-script';
-  script.src = 'https://www.google.com/recaptcha/api.js';
-  script.async = true;
-  script.defer = true;
-  document.body.appendChild(script);
-}
-window.onRecaptchaV2Success = (token) => {
-  window.recaptchaV2Token = token;
-  recaptchaV2Passed = true;
-  handleDynamicSubmit();
-};
-async function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
+  function loadRecaptchaV2() {
+    if (document.getElementById('recaptcha-v2-script')) return;
+    
+    const script = document.createElement('script');
+    script.id = 'recaptcha-v2-script';
+    script.src = '/lib/recaptcha.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+  
+  window.onRecaptchaV2Success = (token) => {
+    window.recaptchaV2Token = token;
+    recaptchaV2Passed = true;
+    handleDynamicSubmit();
+  };
+  
+  async function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 
   function selectAge(group) {
     ageGroup = group;
@@ -131,364 +172,337 @@ async function blobToBase64(blob) {
     answers = answers;
   }
 
-async function handleDynamicSubmit() {
-  let token;
-   isSubmitting = true;
-   try {
-  if (recaptchaV2Passed) {
-    token = window.recaptchaV2Token;
-  } else {
-    token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-  }
-
-  const results = {
-    ageGroup,
-    participantName,
-    childName,
-    responses: questions.map((q, idx) => ({
-      questionNum: q.questionNum,
-      questionText: q.questionText,
-      answer: answers[idx].value,
-      ...(q.subQuestion === 'TRUE' && {
-        subQuestionText: q.subQuestionText,
-        subAnswer: answers[idx].subValue
-      })
-    }))
-  };
-
-
-  const pdfBase64 = await generatePDF(results);
-  const docxBase64 = await generateStrategiesDOCX(results);
-  const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
-  const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
-  const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-  const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-
-
-  const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      participantName: results.participantName,
-      childName: results.childName,
-      ageGroup: results.ageGroup,
-      pdfBase64,
-      pdfFilename,       
-      docxBase64,
-      docxFilename,       
-      schoolDocxBase64,
-      schoolDocxFilename, 
-      email: 'addytwhite@icloud.com',
-      recaptchaToken: token
-    }),
-  });
-  
-
-  if (res.status === 403 && !recaptchaV2Passed) {
-    showRecaptchaV2 = true;
-    loadRecaptchaV2();
-  } else if (res.ok) {
-    surveyCompleted = true;
-  } else {
-    console.error(await res.text());
-  }
-    } finally {
-    isSubmitting = false;
-  }
-
-}
-
-
-function safeFileName(name) {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')     
-    .replace(/[^a-z0-9-_]/g, '') 
-    || 'anonymous';           
-}
-  async function generatePDF(results) {
-    const html2pdf = (await import('html2pdf.js')).default;
-    const tempDiv = document.createElement('div');
+  async function handleDynamicSubmit() {
+    isSubmitting = true;
     
-    tempDiv.innerHTML = `
-      <div style="
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        max-width: 800px;
-        margin: 0 auto;
-      ">
-        <h1 style="color: #530A7A; text-align: center; margin-bottom: 30px;">
-          CVI Survey Results
-        </h1>
-        
-        <div style="margin-bottom: 40px;">
-          <h2 style="color: #530A7A; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            Participant Information
-          </h2>
-          <p><strong>Name of Form User:</strong> ${results.participantName || 'N/A'}</p>
-          <p><strong>Child Name:</strong> ${results.childName || 'N/A'}</p>
-          <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-        </div>
-        
-        ${results.responses.map(response => `
-          <div style="
-            margin-bottom: 30px;
-            page-break-inside: avoid;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-          ">
-            <h3 style="color: #530A7A;">Question ${response.questionNum}</h3>
-            <p style="font-weight: bold;">${response.questionText}</p>
-            <p><strong>Response:</strong> ${response.answer}</p>
-          ${response.subAnswer ? `
-            <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #530A7A;">
-              <p><strong>Follow-up:</strong> ${response.subQuestionText}</p>
-              <p><strong>Answer:</strong> ${getSubLabel(response)}</p>
+    try {
+      let token;
+      try {
+        await loadRecaptcha();
+        token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
+      } catch (e) {
+        console.error('reCAPTCHA v3 failed, falling back to v2:', e);
+        showRecaptchaV2 = true;
+        loadRecaptchaV2();
+        return;
+      }
+
+      const results = {
+        ageGroup,
+        participantName,
+        childName,
+        responses: questions.map((q, idx) => ({
+          questionNum: q.questionNum,
+          questionText: q.questionText,
+          answer: answers[idx].value,
+          ...(q.subQuestion === 'TRUE' && {
+            subQuestionText: q.subQuestionText,
+            subAnswer: answers[idx].subValue
+          })
+        }))
+      };
+
+      const pdfBase64 = await generatePDF(results);
+      const docxBase64 = await generateStrategiesDOCX(results);
+      const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+      
+      const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
+      const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+      const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+
+      const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          participantName: results.participantName,
+          childName: results.childName,
+          ageGroup: results.ageGroup,
+          pdfBase64,
+          pdfFilename,       
+          docxBase64,
+          docxFilename,       
+          schoolDocxBase64,
+          schoolDocxFilename, 
+          email: 'addytwhite@icloud.com',
+          recaptchaToken: token
+        }),
+      });
+      
+      if (res.status === 403 && !recaptchaV2Passed) {
+        showRecaptchaV2 = true;
+        loadRecaptchaV2();
+      } else if (res.ok) {
+        surveyCompleted = true;
+      } else {
+        console.error('Submission error:', await res.text());
+      }
+    } catch (error) {
+      console.error('Submission failed:', error);
+      
+      if (isIOS) {
+        alert("Submission failed on iOS. Please try again or contact support.");
+      }
+    } finally {
+      isSubmitting = false;
+    }
+  }
+
+  function safeFileName(name) {
+    return name
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')     
+      .replace(/[^a-z0-9-_]/g, '') 
+      || 'anonymous';           
+  }
+  
+  async function generatePDF(results) {
+    try {
+      await loadScript('/lib/html2pdf.bundle.min.js');
+      const html2pdf = window.html2pdf;
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = `
+        <div style="
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          max-width: 800px;
+          margin: 0 auto;
+        ">
+          <h1 style="color: #530A7A; text-align: center; margin-bottom: 30px;">
+            CVI Survey Results
+          </h1>
+          
+          <div style="margin-bottom: 40px;">
+            <h2 style="color: #530A7A; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+              Participant Information
+            </h2>
+            <p><strong>Name of Form User:</strong> ${results.participantName || 'N/A'}</p>
+            <p><strong>Child Name:</strong> ${results.childName || 'N/A'}</p>
+            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+          </div>
+          
+          ${results.responses.map(response => `
+            <div style="
+              margin-bottom: 30px;
+              page-break-inside: avoid;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 20px;
+            ">
+              <h3 style="color: #530A7A;">Question ${response.questionNum}</h3>
+              <p style="font-weight: bold;">${response.questionText}</p>
+              <p><strong>Response:</strong> ${response.answer}</p>
+            ${response.subAnswer ? `
+              <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #530A7A;">
+                <p><strong>Follow-up:</strong> ${response.subQuestionText}</p>
+                <p><strong>Answer:</strong> ${getSubLabel(response)}</p>
+              </div>
+            ` : ''}
             </div>
-          ` : ''}
+          `).join('')}
+        </div>
+      `;
 
-          </div>
-        `).join('')}
-      </div>
-    `;
+      const blob = await html2pdf()
+        .set({
+          margin: 15,
+          filename: safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`),
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2,
+            logging: false,
+            letterRendering: true,
+            useCORS: true
+          },
+          jsPDF: { 
+            unit: 'mm', 
+            format: 'a4',
+            orientation: 'portrait'
+          }
+        })
+        .from(tempDiv)
+        .outputPdf('blob');
 
-    await html2pdf()
-      .set({
-        margin: 15,
-        filename: safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`),
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2,
-          logging: false,
-          letterRendering: true,
-          useCORS: true
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      })
-const blob = await html2pdf()
-      .set({
-        margin: 15,
-        filename: safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`),
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2,
-          logging: false,
-          letterRendering: true,
-          useCORS: true
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      })
-  .from(tempDiv)
-  .outputPdf('blob');
-
-const pdfBase64 = await blobToBase64(blob);
-return pdfBase64;
+      return await blobToBase64(blob);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      
+      if (isIOS) {
+        alert("PDF generation failed on iOS. Please try again or contact support.");
+      }
+      throw error;
+    }
   }
 
-async function generateStrategiesDOCX(results) {
-  const htmlDocx = window.htmlDocx;
-
-  const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
-  const significantResponses = results.responses.filter(
-    response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
-  );
-
-  const strategySections = [];
-
-  for (const response of significantResponses) {
-    const questionText = response.questionText.replace(/\?$/, '').trim();
-    let strategyKeys;
-
-    if ((ageGroup === '4-8' && response.questionNum === 34) ||
-        (ageGroup === '9-12' && response.questionNum === 36)) {
-
-      strategyKeys = [response.questionNum.toString()];
-
-      if (response.subAnswer) {
-        const optionNum = response.subAnswer.replace('Option', '').trim();
-        if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-        else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-        else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
-      }
-
-    } else {
-      strategyKeys = [response.questionNum.toString()];
-    }
-
-    for (const key of strategyKeys) {
-      const strategiesForKey = strategies.filter(
-        s => s.questionNum.toString() === key
+  async function generateStrategiesDOCX(results) {
+    try {
+      await loadScript('/lib/html-docx.js');
+      
+      const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
+      const significantResponses = results.responses.filter(
+        response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
       );
 
-      if (strategiesForKey.length > 0) {
-        let customHeadingText = '';
+      const strategySections = [];
 
-        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
-        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
-        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
-        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
-        else customHeadingText = `${key}. ${questionText}`;
+      for (const response of significantResponses) {
+        const questionText = response.questionText.replace(/\?$/, '').trim();
+        let strategyKeys;
 
-        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+        if ((ageGroup === '4-8' && response.questionNum === 34) ||
+            (ageGroup === '9-12' && response.questionNum === 36)) {
 
-        strategySections.push(`
-          <div>
-            <h3>${customHeadingText}</h3>
-            <ul>${items}</ul>
-          </div>
-        `);
+          strategyKeys = [response.questionNum.toString()];
+
+          if (response.subAnswer) {
+            const optionNum = response.subAnswer.replace('Option', '').trim();
+            if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+            else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+            else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+          }
+
+        } else {
+          strategyKeys = [response.questionNum.toString()];
+        }
+
+        for (const key of strategyKeys) {
+          const strategiesForKey = strategies.filter(
+            s => s.questionNum.toString() === key
+          );
+
+          if (strategiesForKey.length > 0) {
+            let customHeadingText = '';
+
+            if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+            else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+            else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+            else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+            else customHeadingText = `${key}. ${questionText}`;
+
+            const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+
+            strategySections.push(`
+              <div>
+                <h3>${customHeadingText}</h3>
+                <ul>${items}</ul>
+              </div>
+            `);
+          }
+        }
       }
+
+      const htmlString = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { color: #530A7A; text-align: center; }
+              h3 { margin-top: 1.2em; color: #333; }
+              ul { margin: 0; padding-left: 1.2em; }
+              li { margin-bottom: 0.4em; }
+            </style>
+          </head>
+          <body>
+            <h1>CVI Strategies Report</h1>
+            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+            ${strategySections.join('')}
+          </body>
+        </html>
+      `;
+
+      const converted = window.htmlDocx.asBlob(htmlString);
+      return await blobToBase64(converted);
+    } catch (error) {
+      console.error('DOCX generation failed:', error);
+      throw error;
     }
   }
 
-  const htmlString = `
-    <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; }
-          h1 { color: #530A7A; text-align: center; }
-          h3 { margin-top: 1.2em; color: #333; }
-          ul { margin: 0; padding-left: 1.2em; }
-          li { margin-bottom: 0.4em; }
-        </style>
-      </head>
-      <body>
-        <h1>CVI Strategies Report</h1>
-        <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-        <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-        ${strategySections.join('')}
-      </body>
-    </html>
-  `;
-
-  const converted = htmlDocx.asBlob(htmlString);
-
-const docxBlob = converted;
-const docxBase64 = await blobToBase64(docxBlob);
-return docxBase64;
-
-}
-async function generateSchoolStrategiesDOCX(results) {
-  const htmlDocx = window.htmlDocx;
-
-  const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
-  const significantResponses = results.responses.filter(
-    response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
-  );
-
-  const strategySections = [];
-
-  for (const response of significantResponses) {
-    const questionText = response.questionText.replace(/\?$/, '').trim();
-    let strategyKeys;
-
-    if ((ageGroup === '4-8' && response.questionNum === 34) ||
-        (ageGroup === '9-12' && response.questionNum === 36)) {
-
-      strategyKeys = [response.questionNum.toString()];
-
-      if (response.subAnswer) {
-        const optionNum = response.subAnswer.replace('Option', '').trim();
-        if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-        else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-        else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
-      }
-
-    } else {
-      strategyKeys = [response.questionNum.toString()];
-    }
-
-    for (const key of strategyKeys) {
-      const strategiesForKey = strategies.filter(
-        s => s.questionNum.toString() === key
+  async function generateSchoolStrategiesDOCX(results) {
+    try {
+      await loadScript('/lib/html-docx.js');
+      
+      const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
+      const significantResponses = results.responses.filter(
+        response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
       );
 
-      if (strategiesForKey.length > 0) {
-        let customHeadingText = '';
+      const strategySections = [];
 
-        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
-        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
-        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
-        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
-        else customHeadingText = `${key}. ${questionText}`;
+      for (const response of significantResponses) {
+        const questionText = response.questionText.replace(/\?$/, '').trim();
+        let strategyKeys;
 
-        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+        if ((ageGroup === '4-8' && response.questionNum === 34) ||
+            (ageGroup === '9-12' && response.questionNum === 36)) {
 
-        strategySections.push(`
-          <div>
-            <h3>${customHeadingText}</h3>
-            <ul>${items}</ul>
-          </div>
-        `);
+          strategyKeys = [response.questionNum.toString()];
+
+          if (response.subAnswer) {
+            const optionNum = response.subAnswer.replace('Option', '').trim();
+            if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+            else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+            else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+          }
+
+        } else {
+          strategyKeys = [response.questionNum.toString()];
+        }
+
+        for (const key of strategyKeys) {
+          const strategiesForKey = strategies.filter(
+            s => s.questionNum.toString() === key
+          );
+
+          if (strategiesForKey.length > 0) {
+            let customHeadingText = '';
+
+            if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+            else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+            else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+            else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+            else customHeadingText = `${key}. ${questionText}`;
+
+            const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+
+            strategySections.push(`
+              <div>
+                <h3>${customHeadingText}</h3>
+                <ul>${items}</ul>
+              </div>
+            `);
+          }
+        }
       }
+
+      const htmlString = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { color: #530A7A; text-align: center; }
+              h3 { margin-top: 1.2em; color: #333; }
+              ul { margin: 0; padding-left: 1.2em; }
+              li { margin-bottom: 0.4em; }
+            </style>
+          </head>
+          <body>
+            <h1>CVI Strategies Report (School)</h1>
+            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+            ${strategySections.join('')}
+          </body>
+        </html>
+      `;
+
+      const converted = window.htmlDocx.asBlob(htmlString);
+      return await blobToBase64(converted);
+    } catch (error) {
+      console.error('School DOCX generation failed:', error);
+      throw error;
     }
   }
-
-  const htmlString = `
-    <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; }
-          h1 { color: #530A7A; text-align: center; }
-          h3 { margin-top: 1.2em; color: #333; }
-          ul { margin: 0; padding-left: 1.2em; }
-          li { margin-bottom: 0.4em; }
-        </style>
-      </head>
-      <body>
-        <h1>CVI Strategies Report (School)</h1>
-        <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-        <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-        ${strategySections.join('')}
-      </body>
-    </html>
-  `;
-
-  const converted = htmlDocx.asBlob(htmlString);
-
-const docxBlob = converted;
-const docxBase64 = await blobToBase64(docxBlob);
-return docxBase64;
-
-}
-window.quickPDFTest = async () => {
-  const html2pdf = (await import('html2pdf.js')).default;
-
-  const tempDiv = document.createElement('div');
-  tempDiv.style.fontFamily = 'Arial, sans-serif';
-  tempDiv.style.maxWidth = '800px';
-  tempDiv.style.margin = '0 auto';
-  tempDiv.style.padding = '20px';
-
-  tempDiv.innerHTML = `
-    <h1 style="color: #530A7A;">Test PDF Content</h1>
-    <p>This is a test paragraph. It should wrap nicely across multiple lines and pages. Repeat this paragraph to simulate a long document.</p>
-    ${'<p>More test text. Wrapping should be handled automatically by html2pdf. </p>'.repeat(50)}
-  `;
-
-  html2pdf().set({
-    margin: 10,
-    filename: `test-html2pdf.pdf`,
-    html2canvas: {
-      scale: 2,
-      logging: true
-    },
-    jsPDF: {
-      unit: 'mm',
-      format: 'a4',
-      orientation: 'portrait'
-    }
-  }).from(tempDiv).save();
-};
 
   $: isForward = currentPage > previousPage;
 </script>
