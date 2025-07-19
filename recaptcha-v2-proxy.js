@@ -1,0 +1,1 @@
+document.write('<script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaV2LoadCallback&render=explicit"><\/script>');
