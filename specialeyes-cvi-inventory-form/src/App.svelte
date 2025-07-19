@@ -74,36 +74,70 @@
     document.addEventListener('click', loadRecaptcha, { once: true });
   });
   
-  async function loadRecaptcha() {
+   async function loadRecaptcha() {
     if (recaptchaLoaded) return;
     
     try {
-      const script = document.createElement('script');
-      script.src = '/recaptcha-proxy.js';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        console.log('reCAPTCHA proxy loaded');
-        if (window.grecaptcha) {
-          window.grecaptcha.ready(() => {
-            console.log('reCAPTCHA ready');
-            recaptchaLoaded = true;
-            window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
-              .then(token => console.log('reCAPTCHA preloaded:', token))
-              .catch(err => console.error('reCAPTCHA preload error:', err));
-          });
-        } else {
-          console.error('grecaptcha not available after proxy load');
-        }
-      };
-      script.onerror = (e) => {
-        console.error('reCAPTCHA proxy load failed:', e);
-        recaptchaLoaded = false;
-      };
-      document.head.appendChild(script);
+      const proxyScript = document.createElement('script');
+      proxyScript.src = '/recaptcha-proxy.js';
+      proxyScript.async = true;
+      
+      await new Promise((resolve, reject) => {
+        proxyScript.onload = resolve;
+        proxyScript.onerror = reject;
+        document.head.appendChild(proxyScript);
+      });
+      
+      await waitForRecaptcha();
+      
+      await initializeRecaptcha();
     } catch (e) {
-      console.error('reCAPTCHA initialization failed:', e);
+      console.error('Proxy method failed, trying direct load', e);
+      await loadDirectly();
     }
+  }
+
+  async function waitForRecaptcha() {
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (window.grecaptcha) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  async function initializeRecaptcha() {
+    return new Promise((resolve) => {
+      window.grecaptcha.ready(() => {
+        console.log('reCAPTCHA ready');
+        recaptchaLoaded = true;
+        
+        window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
+          .then(token => console.log('Token preloaded'))
+          .catch(err => console.error('Preload error:', err));
+          
+        resolve();
+      });
+    });
+  }
+
+  async function loadDirectly() {
+    return new Promise((resolve, reject) => {
+      const directScript = document.createElement('script');
+      directScript.src = 'https://www.google.com/recaptcha/api.js?render=6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ';
+      directScript.async = true;
+      
+      directScript.onload = async () => {
+        await waitForRecaptcha();
+        await initializeRecaptcha();
+        resolve();
+      };
+      
+      directScript.onerror = reject;
+      document.head.appendChild(directScript);
+    });
   }
 
   function loadScript(src) {
@@ -130,14 +164,23 @@
     return options[optionIndex] || response.subAnswer;
   }
 
-  function loadRecaptchaV2() {
+    function loadRecaptchaV2() {
     if (document.getElementById('recaptcha-v2-script')) return;
     
     const script = document.createElement('script');
     script.id = 'recaptcha-v2-script';
     script.src = '/recaptcha-v2-proxy.js';
     script.async = true;
-    script.defer = true;
+    
+    script.onload = () => {
+      const checkReady = setInterval(() => {
+        if (window.grecaptcha && window.grecaptcha.render) {
+          clearInterval(checkReady);
+          window.onRecaptchaV2LoadCallback();
+        }
+      }, 100);
+    };
+    
     document.body.appendChild(script);
   }
   
