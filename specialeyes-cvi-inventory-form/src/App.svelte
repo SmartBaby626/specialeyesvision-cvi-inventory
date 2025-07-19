@@ -48,7 +48,7 @@
   import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
   import UserNameBox from './lib/UserNameBox.svelte';
   import Loader from './lib/Loader.svelte';
-  
+
   let isSubmitting = false;
   let currentPage = 0;
   let previousPage = 0;
@@ -63,35 +63,51 @@
   let isIOS = false;
   let recaptchaLoaded = false;
   
+
   import { onMount } from 'svelte';
   onMount(() => {
+
     isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     console.log('Running on iOS:', isIOS);
     console.log('User Agent:', navigator.userAgent);
     
+
     document.addEventListener('click', loadRecaptcha, { once: true });
   });
   
+
   async function loadRecaptcha() {
     if (recaptchaLoaded) return;
     
     try {
-      await loadScript('/lib/recaptcha.js');
-      
-      grecaptcha.ready(() => {
-        grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
-          .then(token => console.log('reCAPTCHA preloaded:', token))
-          .catch(err => console.error('reCAPTCHA preload error:', err));
-      });
-      
-      recaptchaLoaded = true;
+
+      const script = document.createElement('script');
+      script.src = 'https://www.google.com/recaptcha/api.js?render=6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        grecaptcha.ready(() => {
+          console.log('reCAPTCHA loaded');
+          recaptchaLoaded = true;
+
+          grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
+            .then(token => console.log('reCAPTCHA preloaded:', token))
+            .catch(err => console.error('reCAPTCHA preload error:', err));
+        });
+      };
+      script.onerror = (e) => {
+        console.error('reCAPTCHA load failed:', e);
+        recaptchaLoaded = false;
+      };
+      document.head.appendChild(script);
     } catch (e) {
-      console.error('reCAPTCHA load failed:', e);
+      console.error('reCAPTCHA initialization failed:', e);
     }
   }
-  
+
+
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -121,11 +137,20 @@
     
     const script = document.createElement('script');
     script.id = 'recaptcha-v2-script';
-    script.src = '/lib/recaptcha.js';
+    script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaV2LoadCallback&render=explicit';
     script.async = true;
     script.defer = true;
     document.body.appendChild(script);
   }
+  
+  window.onRecaptchaV2LoadCallback = () => {
+    grecaptcha.render('recaptcha-v2', {
+      sitekey: '6LdREH8rAAAAANVJX3q3hClHuvxs_kyaVOmMRtTI',
+      callback: window.onRecaptchaV2Success,
+      'expired-callback': () => console.log('reCAPTCHA expired'),
+      'error-callback': () => console.log('reCAPTCHA error')
+    });
+  };
   
   window.onRecaptchaV2Success = (token) => {
     window.recaptchaV2Token = token;
@@ -176,16 +201,34 @@
     isSubmitting = true;
     
     try {
+
       let token;
-      try {
-        await loadRecaptcha();
-        token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-      } catch (e) {
-        console.error('reCAPTCHA v3 failed, falling back to v2:', e);
+      
+
+      if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
+        try {
+          token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
+          console.log('Using reCAPTCHA v3 token:', token);
+        } catch (e) {
+          console.error('reCAPTCHA v3 failed:', e);
+        }
+      }
+      
+
+      if (!token && window.recaptchaV2Token) {
+        token = window.recaptchaV2Token;
+        console.log('Using reCAPTCHA v2 token:', token);
+      }
+      
+
+      if (!token) {
+        console.log('No reCAPTCHA token, showing v2');
         showRecaptchaV2 = true;
         loadRecaptchaV2();
+        isSubmitting = false;
         return;
       }
+
 
       const results = {
         ageGroup,
@@ -201,7 +244,6 @@
           })
         }))
       };
-
       const pdfBase64 = await generatePDF(results);
       const docxBase64 = await generateStrategiesDOCX(results);
       const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
@@ -228,7 +270,8 @@
         }),
       });
       
-      if (res.status === 403 && !recaptchaV2Passed) {
+      if (res.status === 403) {
+        console.log('reCAPTCHA verification failed, showing v2');
         showRecaptchaV2 = true;
         loadRecaptchaV2();
       } else if (res.ok) {
@@ -240,7 +283,7 @@
       console.error('Submission failed:', error);
       
       if (isIOS) {
-        alert("Submission failed on iOS. Please try again or contact support.");
+        alert("Submission failed. Please try again or contact support.");
       }
     } finally {
       isSubmitting = false;
@@ -328,7 +371,7 @@
       console.error('PDF generation failed:', error);
       
       if (isIOS) {
-        alert("PDF generation failed on iOS. Please try again or contact support.");
+        alert("PDF generation failed. Please try again or contact support.");
       }
       throw error;
     }
