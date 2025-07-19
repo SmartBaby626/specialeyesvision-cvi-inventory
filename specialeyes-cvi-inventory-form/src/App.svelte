@@ -379,7 +379,7 @@
 
   async function generateStrategiesDOCX(results) {
     try {
-      await loadScript('/lib/html-docx.js');
+      await loadScript('/lib/html-docx.min.js');
       
       const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
       const significantResponses = results.responses.filter(
@@ -464,7 +464,7 @@
 
   async function generateSchoolStrategiesDOCX(results) {
     try {
-      await loadScript('/lib/html-docx.js');
+      await loadScript('/lib/html-docx.min.js');
       
       const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
       const significantResponses = results.responses.filter(
