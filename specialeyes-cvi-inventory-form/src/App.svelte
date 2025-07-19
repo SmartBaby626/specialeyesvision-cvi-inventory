@@ -62,8 +62,7 @@
   let showRecaptchaV2 = false;
   let isIOS = false;
   let recaptchaLoaded = false;
-  let recaptchaRetryCount = 0;
-  const MAX_RETRIES = 3;
+
   import { onMount } from 'svelte';
   onMount(() => {
     isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -110,45 +109,17 @@
   }
 
   async function initializeRecaptcha() {
-    return new Promise((resolve, reject) => {
-      if (!window.grecaptcha) {
-        if (recaptchaRetryCount < MAX_RETRIES) {
-          recaptchaRetryCount++;
-          console.log(`Retrying reCAPTCHA (attempt ${recaptchaRetryCount})`);
-          setTimeout(() => initializeRecaptcha().then(resolve).catch(reject), 1000);
-          return;
-        }
-        reject(new Error('grecaptcha not defined after retries'));
-        return;
-      }
-      
-      const readyCheck = () => {
-        if (window.grecaptcha.ready) {
-          window.grecaptcha.ready(() => {
-            console.log('reCAPTCHA ready');
-            recaptchaLoaded = true;
-            
-            window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'verify' })
-              .then(token => {
-                console.log('Site key verified with token:', token.slice(0, 10) + '...');
-                resolve();
-              })
-              .catch(err => {
-                console.error('Site key verification failed:', err);
-                if (recaptchaRetryCount < MAX_RETRIES) {
-                  recaptchaRetryCount++;
-                  setTimeout(() => readyCheck(), 1000);
-                } else {
-                  reject(err);
-                }
-              });
-          });
-        } else {
-          setTimeout(readyCheck, 100);
-        }
-      };
-      
-      readyCheck();
+    return new Promise((resolve) => {
+      window.grecaptcha.ready(() => {
+        console.log('reCAPTCHA ready');
+        recaptchaLoaded = true;
+        
+        window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
+          .then(token => console.log('Token preloaded'))
+          .catch(err => console.error('Preload error:', err));
+          
+        resolve();
+      });
     });
   }
 
@@ -270,20 +241,7 @@
     answers[idx].subValue = option;
     answers = answers;
   }
-  async function submitWithRetry(url, options, retries = 3, delay = 1000) {
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response;
-    } catch (error) {
-      if (retries > 0) {
-        console.log(`Retrying submit (${retries} left)...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return submitWithRetry(url, options, retries - 1, delay * 2);
-      }
-      throw error;
-    }
-  }
+
   async function handleDynamicSubmit() {
     isSubmitting = true;
     
@@ -338,12 +296,10 @@
         return;
       }
 
-const res = await submitWithRetry(
-        'https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+      const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           participantName: results.participantName,
           childName: results.childName,
           ageGroup: results.ageGroup,
@@ -356,11 +312,7 @@ const res = await submitWithRetry(
           email: 'addytwhite@icloud.com',
           recaptchaToken: token
         }),
-          signal: controller.signal
-        },
-        3,
-        1000
-      );
+      });
       
       if (res.ok) {
         surveyCompleted = true;
