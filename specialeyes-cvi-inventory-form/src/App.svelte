@@ -48,7 +48,7 @@
   import strategiesAtSchool9_12 from '../Strategies/strategiesAtSchool9-12.json';
   import UserNameBox from './lib/UserNameBox.svelte';
   import Loader from './lib/Loader.svelte';
-
+  
   let isSubmitting = false;
   let currentPage = 0;
   let previousPage = 0;
@@ -62,43 +62,42 @@
   let showRecaptchaV2 = false;
   let isIOS = false;
   let recaptchaLoaded = false;
-  
 
   import { onMount } from 'svelte';
   onMount(() => {
-
     isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     console.log('Running on iOS:', isIOS);
     console.log('User Agent:', navigator.userAgent);
     
-
     document.addEventListener('click', loadRecaptcha, { once: true });
   });
   
-
   async function loadRecaptcha() {
     if (recaptchaLoaded) return;
     
     try {
-
       const script = document.createElement('script');
-      script.src = 'https://www.google.com/recaptcha/api.js?render=6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ';
+      script.src = '/recaptcha-proxy.js';
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        grecaptcha.ready(() => {
-          console.log('reCAPTCHA loaded');
-          recaptchaLoaded = true;
-
-          grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
-            .then(token => console.log('reCAPTCHA preloaded:', token))
-            .catch(err => console.error('reCAPTCHA preload error:', err));
-        });
+        console.log('reCAPTCHA proxy loaded');
+        if (window.grecaptcha) {
+          window.grecaptcha.ready(() => {
+            console.log('reCAPTCHA ready');
+            recaptchaLoaded = true;
+            window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
+              .then(token => console.log('reCAPTCHA preloaded:', token))
+              .catch(err => console.error('reCAPTCHA preload error:', err));
+          });
+        } else {
+          console.error('grecaptcha not available after proxy load');
+        }
       };
       script.onerror = (e) => {
-        console.error('reCAPTCHA load failed:', e);
+        console.error('reCAPTCHA proxy load failed:', e);
         recaptchaLoaded = false;
       };
       document.head.appendChild(script);
@@ -106,7 +105,6 @@
       console.error('reCAPTCHA initialization failed:', e);
     }
   }
-
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -137,19 +135,23 @@
     
     const script = document.createElement('script');
     script.id = 'recaptcha-v2-script';
-    script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaV2LoadCallback&render=explicit';
+    script.src = '/recaptcha-v2-proxy.js';
     script.async = true;
     script.defer = true;
     document.body.appendChild(script);
   }
   
   window.onRecaptchaV2LoadCallback = () => {
-    grecaptcha.render('recaptcha-v2', {
-      sitekey: '6LdREH8rAAAAANVJX3q3hClHuvxs_kyaVOmMRtTI',
-      callback: window.onRecaptchaV2Success,
-      'expired-callback': () => console.log('reCAPTCHA expired'),
-      'error-callback': () => console.log('reCAPTCHA error')
-    });
+    if (window.grecaptcha && window.grecaptcha.render) {
+      grecaptcha.render('recaptcha-v2', {
+        sitekey: '6LdREH8rAAAAANVJX3q3hClHuvxs_kyaVOmMRtTI',
+        callback: window.onRecaptchaV2Success,
+        'expired-callback': () => console.log('reCAPTCHA expired'),
+        'error-callback': () => console.log('reCAPTCHA error')
+      });
+    } else {
+      console.error('grecaptcha.render not available');
+    }
   };
   
   window.onRecaptchaV2Success = (token) => {
@@ -201,35 +203,6 @@
     isSubmitting = true;
     
     try {
-
-      let token;
-      
-
-      if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
-        try {
-          token = await grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-          console.log('Using reCAPTCHA v3 token:', token);
-        } catch (e) {
-          console.error('reCAPTCHA v3 failed:', e);
-        }
-      }
-      
-
-      if (!token && window.recaptchaV2Token) {
-        token = window.recaptchaV2Token;
-        console.log('Using reCAPTCHA v2 token:', token);
-      }
-      
-
-      if (!token) {
-        console.log('No reCAPTCHA token, showing v2');
-        showRecaptchaV2 = true;
-        loadRecaptchaV2();
-        isSubmitting = false;
-        return;
-      }
-
-
       const results = {
         ageGroup,
         participantName,
@@ -244,6 +217,8 @@
           })
         }))
       };
+
+
       const pdfBase64 = await generatePDF(results);
       const docxBase64 = await generateStrategiesDOCX(results);
       const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
@@ -251,6 +226,32 @@
       const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
       const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
       const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+
+
+      let token = null;
+      
+      if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
+        try {
+          token = await window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
+          console.log('Using reCAPTCHA v3 token:', token);
+        } catch (e) {
+          console.error('reCAPTCHA v3 execution failed:', e);
+        }
+      }
+      
+
+      if (!token && window.recaptchaV2Token) {
+        token = window.recaptchaV2Token;
+        console.log('Using reCAPTCHA v2 token:', token);
+      }
+
+      if (!token) {
+        console.log('No reCAPTCHA token, showing v2');
+        showRecaptchaV2 = true;
+        loadRecaptchaV2();
+        isSubmitting = false;
+        return;
+      }
 
       const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
         method: 'POST',
@@ -270,20 +271,26 @@
         }),
       });
       
-      if (res.status === 403) {
-        console.log('reCAPTCHA verification failed, showing v2');
-        showRecaptchaV2 = true;
-        loadRecaptchaV2();
-      } else if (res.ok) {
+      if (res.ok) {
         surveyCompleted = true;
       } else {
-        console.error('Submission error:', await res.text());
+        const errorText = await res.text();
+        console.error('Submission error:', res.status, errorText);
+        
+        if (isIOS) {
+          alert(`Submission failed: ${res.status} ${res.statusText}. Please try again or contact support.`);
+        }
+        
+        if (res.status === 403 && !recaptchaV2Passed) {
+          showRecaptchaV2 = true;
+          loadRecaptchaV2();
+        }
       }
     } catch (error) {
       console.error('Submission failed:', error);
       
       if (isIOS) {
-        alert("Submission failed. Please try again or contact support.");
+        alert(`Submission error: ${error.message}. Please try again or contact support.`);
       }
     } finally {
       isSubmitting = false;
@@ -301,7 +308,10 @@
   
   async function generatePDF(results) {
     try {
-      await loadScript('/lib/html2pdf.bundle.min.js');
+      if (!window.html2pdf) {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+      }
+      
       const html2pdf = window.html2pdf;
       
       const tempDiv = document.createElement('div');
@@ -379,7 +389,9 @@
 
   async function generateStrategiesDOCX(results) {
     try {
-      await loadScript('/lib/html-docx.min.js');
+      if (!window.htmlDocx) {
+        await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+      }
       
       const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
       const significantResponses = results.responses.filter(
@@ -464,7 +476,9 @@
 
   async function generateSchoolStrategiesDOCX(results) {
     try {
-      await loadScript('/lib/html-docx.min.js');
+      if (!window.htmlDocx) {
+        await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+      }
       
       const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
       const significantResponses = results.responses.filter(
