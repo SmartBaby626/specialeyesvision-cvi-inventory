@@ -362,14 +362,34 @@ if (isIOS) {
   }
 }
 
-  function safeFileName(name) {
-    return name
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')     
-      .replace(/[^a-z0-9-_]/g, '') 
-      || 'anonymous';           
+// Frontend helper
+function safeFileName(filename) {
+  if (!filename || typeof filename !== 'string') return 'file.pdf';
+
+  filename = filename.trim();
+
+  const lastDot = filename.lastIndexOf('.');
+  let base, ext;
+  if (lastDot > 0) {
+    base = filename.slice(0, lastDot);
+    ext  = filename.slice(lastDot + 1).toLowerCase();
+  } else {
+    base = filename;
+    ext  = 'pdf';
   }
+
+  base = base
+    .replace(/[/\\?%*:|"<>]/g, '-')     
+    .replace(/\s+/g, '-')             
+    .replace(/[^a-zA-Z0-9._-]/g, '') 
+    .replace(/^\.+|\.+$/g, '')       
+    .replace(/\.{2,}/g, '.');    
+  const maxBase = 180;
+  if (base.length > maxBase) base = base.slice(0, maxBase);
+
+  return `${base}.${ext}`;
+}
+
   
   async function generatePDF(results) {
     try {
