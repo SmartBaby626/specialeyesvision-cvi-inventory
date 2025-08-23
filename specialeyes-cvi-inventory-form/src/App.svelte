@@ -296,23 +296,31 @@
         return;
       }
 
-      const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          participantName: results.participantName,
-          childName: results.childName,
-          ageGroup: results.ageGroup,
-          pdfBase64,
-          pdfFilename,       
-          docxBase64,
-          docxFilename,       
-          schoolDocxBase64,
-          schoolDocxFilename, 
-          email: 'addytwhite@icloud.com',
-          recaptchaToken: token
-        }),
-      });
+const payload = {
+  participantName: results.participantName,
+  childName: results.childName,
+  ageGroup: results.ageGroup,
+  pdfBase64,
+  pdfFilename,
+  docxBase64,
+  docxFilename,
+  schoolDocxBase64,
+  schoolDocxFilename,
+  email: 'addytwhite@icloud.com',
+  recaptchaToken: token
+};
+
+  const body = JSON.stringify(payload);
+
+
+  console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
+
+  const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+
       
       if (res.ok) {
         surveyCompleted = true;
