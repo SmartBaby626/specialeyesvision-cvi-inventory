@@ -64,6 +64,7 @@
   let recaptchaLoaded = false;
 
   import { onMount } from 'svelte';
+  import pako from 'pako';
   onMount(() => {
     isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -242,111 +243,114 @@
     answers = answers;
   }
 
-  async function handleDynamicSubmit() {
-    isSubmitting = true;
+ async function handleDynamicSubmit() {
+  isSubmitting = true;
+  
+  try {
+    const results = {
+      ageGroup,
+      participantName,
+      childName,
+      responses: questions.map((q, idx) => ({
+        questionNum: q.questionNum,
+        questionText: q.questionText,
+        answer: answers[idx].value,
+        ...(q.subQuestion === 'TRUE' && {
+          subQuestionText: q.subQuestionText,
+          subAnswer: answers[idx].subValue
+        })
+      }))
+    };
+
+    const pdfBase64 = await generatePDF(results);
+    const docxBase64 = await generateStrategiesDOCX(results);
+    const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
     
-    try {
-      const results = {
-        ageGroup,
-        participantName,
-        childName,
-        responses: questions.map((q, idx) => ({
-          questionNum: q.questionNum,
-          questionText: q.questionText,
-          answer: answers[idx].value,
-          ...(q.subQuestion === 'TRUE' && {
-            subQuestionText: q.subQuestionText,
-            subAnswer: answers[idx].subValue
-          })
-        }))
-      };
+    const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
+    const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+    const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
 
-
-      const pdfBase64 = await generatePDF(results);
-      const docxBase64 = await generateStrategiesDOCX(results);
-      const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
-      
-      const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
-      const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-      const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-
-
-      let token = null;
-      
-      if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
-        try {
-          token = await window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-          console.log('Using reCAPTCHA v3 token:', token);
-        } catch (e) {
-          console.error('reCAPTCHA v3 execution failed:', e);
-        }
+    let token = null;
+    if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
+      try {
+        token = await window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
+        console.log('Using reCAPTCHA v3 token:', token);
+      } catch (e) {
+        console.error('reCAPTCHA v3 execution failed:', e);
       }
-      
+    }
 
-      if (!token && window.recaptchaV2Token) {
-        token = window.recaptchaV2Token;
-        console.log('Using reCAPTCHA v2 token:', token);
-      }
+    if (!token && window.recaptchaV2Token) {
+      token = window.recaptchaV2Token;
+      console.log('Using reCAPTCHA v2 token:', token);
+    }
 
-      if (!token) {
-        console.log('No reCAPTCHA token, showing v2');
-        showRecaptchaV2 = true;
-        loadRecaptchaV2();
-        isSubmitting = false;
-        return;
-      }
+    if (!token) {
+      console.log('No reCAPTCHA token, showing v2');
+      showRecaptchaV2 = true;
+      loadRecaptchaV2();
+      isSubmitting = false;
+      return;
+    }
 
-const payload = {
-  participantName: results.participantName,
-  childName: results.childName,
-  ageGroup: results.ageGroup,
-  pdfBase64,
-  pdfFilename,
-  docxBase64,
-  docxFilename,
-  schoolDocxBase64,
-  schoolDocxFilename,
-  email: 'addytwhite@icloud.com',
-  recaptchaToken: token
-};
+    const payload = {
+      participantName: results.participantName,
+      childName: results.childName,
+      ageGroup: results.ageGroup,
+      pdfBase64,
+      pdfFilename,
+      docxBase64,
+      docxFilename,
+      schoolDocxBase64,
+      schoolDocxFilename,
+      email: 'addytwhite@icloud.com',
+      recaptchaToken: token
+    };
 
-  const body = JSON.stringify(payload);
+    let body = JSON.stringify(payload);
 
+    if (isIOS) {
+      console.log("Compressing payload for iOS...");
+      const compressed = pako.gzip(body);
+      body = btoa(String.fromCharCode.apply(null, compressed)); // base64 encode gzip result
+    }
 
-  console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
+    console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
 
-  const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-  });
+    const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': isIOS ? 'application/octet-stream' : 'application/json',
+        'X-Compressed': isIOS ? 'gzip-base64' : 'false'
+      },
+      body,
+    });
 
-      
-      if (res.ok) {
-        surveyCompleted = true;
-      } else {
-        const errorText = await res.text();
-        console.error('Submission error:', res.status, errorText);
-        
-        if (isIOS) {
-          alert(`Submission failed: ${res.status} ${res.statusText}. Please try again or contact support.`);
-        }
-        
-        if (res.status === 403 && !recaptchaV2Passed) {
-          showRecaptchaV2 = true;
-          loadRecaptchaV2();
-        }
-      }
-    } catch (error) {
-      console.error('Submission failed:', error);
+    if (res.ok) {
+      surveyCompleted = true;
+    } else {
+      const errorText = await res.text();
+      console.error('Submission error:', res.status, errorText);
       
       if (isIOS) {
-        alert(`Submission error: ${error.message}. Please try again or contact support.`);
+        alert(`Submission failed: ${res.status} ${res.statusText}. Please try again or contact support.`);
       }
-    } finally {
-      isSubmitting = false;
+      
+      if (res.status === 403 && !recaptchaV2Passed) {
+        showRecaptchaV2 = true;
+        loadRecaptchaV2();
+      }
     }
+  } catch (error) {
+    console.error('Submission failed:', error);
+    
+    if (isIOS) {
+      alert(`Submission error: ${error.message}. Please try again or contact support.`);
+    }
+  } finally {
+    isSubmitting = false;
   }
+}
 
   function safeFileName(name) {
     return name
