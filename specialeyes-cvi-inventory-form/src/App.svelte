@@ -242,6 +242,15 @@
     answers[idx].subValue = option;
     answers = answers;
   }
+function uint8ToBase64(uint8) {
+  let binary = '';
+  const chunkSize = 0x8000; // 32KB chunks
+  for (let i = 0; i < uint8.length; i += chunkSize) {
+    const chunk = uint8.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary);
+}
 
  async function handleDynamicSubmit() {
   isSubmitting = true;
@@ -309,11 +318,12 @@
 
     let body = JSON.stringify(payload);
 
-    if (isIOS) {
-      console.log("Compressing payload for iOS...");
-      const compressed = pako.gzip(body);
-      body = btoa(String.fromCharCode.apply(null, compressed)); // base64 encode gzip result
-    }
+if (isIOS) {
+  console.log("Compressing payload for iOS...");
+  const compressed = pako.gzip(body);
+  body = uint8ToBase64(compressed);
+}
+
 
     console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
 
