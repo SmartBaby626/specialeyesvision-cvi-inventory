@@ -142,19 +142,6 @@
       document.head.appendChild(directScript);
     });
   }
-
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) return resolve();
-      
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
   
   function getSubLabel(response) {
     if (!response.subAnswer) return '';
