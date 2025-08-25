@@ -6,6 +6,8 @@
   * TODO: Add email html
   * TODO: Make sure email is sent with correct data
   * TODO: Switch to mums email
+  * TODO: Fix weird NULL error on subquestion
+  * TODO: Fix filename error
   * TODO: Complete survey on mobile
   * TODO: Double check everything works
   * TODO: Neaten up code
@@ -140,6 +142,19 @@
       document.head.appendChild(directScript);
     });
   }
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) return resolve();
+      
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
   
   function getSubLabel(response) {
     if (!response.subAnswer) return '';
@@ -191,6 +206,14 @@
     handleDynamicSubmit();
   };
   
+  async function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 
   function selectAge(group) {
     ageGroup = group;
@@ -223,7 +246,7 @@
   }
 function uint8ToBase64(uint8) {
   let binary = '';
-  const chunkSize = 0x8000; // 32KB chunks
+  const chunkSize = 0x8000;
   for (let i = 0; i < uint8.length; i += chunkSize) {
     const chunk = uint8.subarray(i, i + chunkSize);
     binary += String.fromCharCode.apply(null, chunk);
@@ -231,139 +254,152 @@ function uint8ToBase64(uint8) {
   return btoa(binary);
 }
 
- async function handleDynamicSubmit() {
-  isSubmitting = true;
-  
-  try {
-    const results = {
-      ageGroup,
-      participantName,
-      childName,
-      responses: questions.map((q, idx) => ({
-        questionNum: q.questionNum,
-        questionText: q.questionText,
-        answer: answers[idx].value,
-        ...(q.subQuestion === 'TRUE' && {
-          subQuestionText: q.subQuestionText,
-          subAnswer: answers[idx].subValue
-        })
-      }))
-    };
-
-    function stripBase64Prefix(str) {
-      const commaIndex = str.indexOf(',');
-      return commaIndex !== -1 ? str.slice(commaIndex + 1) : str;
-    }
-
-    const pdfBase64 = await generatePDF(results);
-    const docxBase64 = stripBase64Prefix(await generateStrategiesDOCX(results));
-    const schoolDocxBase64 = stripBase64Prefix(await generateSchoolStrategiesDOCX(results));
-
+   async function handleDynamicSubmit() {
+    isSubmitting = true;
     
-    const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
-    const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-    const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+    try {
+      const results = {
+        ageGroup,
+        participantName,
+        childName,
+        responses: questions.map((q, idx) => ({
+          questionNum: q.questionNum,
+          questionText: q.questionText,
+          answer: answers[idx].value,
+          ...(q.subQuestion === 'TRUE' && {
+            subQuestionText: q.subQuestionText,
+            subAnswer: answers[idx].subValue
+          })
+        }))
+      };
 
-    let token = null;
-    if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
-      try {
-        token = await window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-        console.log('Using reCAPTCHA v3 token:', token);
-      } catch (e) {
-        console.error('reCAPTCHA v3 execution failed:', e);
-      }
-    }
-
-    if (!token && window.recaptchaV2Token) {
-      token = window.recaptchaV2Token;
-      console.log('Using reCAPTCHA v2 token:', token);
-    }
-
-    if (!token) {
-      console.log('No reCAPTCHA token, showing v2');
-      showRecaptchaV2 = true;
-      loadRecaptchaV2();
-      isSubmitting = false;
-      return;
-    }
-
-    const payload = {
-      participantName: results.participantName,
-      childName: results.childName,
-      ageGroup: results.ageGroup,
-      pdfBase64,
-      pdfFilename,
-      docxBase64,
-      docxFilename,
-      schoolDocxBase64,
-      schoolDocxFilename,
-      email: 'addytwhite@icloud.com',
-      recaptchaToken: token
-    };
-
-
-    let body = JSON.stringify(payload);
-
-if (isIOS) {
-  console.log("Compressing payload for iOS...");
-  const compressed = pako.gzip(body);
-  body = uint8ToBase64(compressed);
-}
-function isValidDocx(base64Str) {
-  try {
-    const binary = atob(base64Str.startsWith("data:") ? base64Str.split(",")[1] : base64Str);
-    return binary.charCodeAt(0) === 0x50 && binary.charCodeAt(1) === 0x4B;
-  } catch (e) {
-    console.error("Docx base64 decode failed:", e);
-    return false;
-  }
-}
-
-console.log("DOCX valid zip?", isValidDocx(docxBase64));
-console.log("School DOCX valid zip?", isValidDocx(schoolDocxBase64));
-
-
-    console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
-    console.log("PDF starts with:", pdfBase64.slice(0,50));
-    console.log("DOCX starts with:", docxBase64.slice(0,50));
-    console.log("School DOCX starts with:", schoolDocxBase64.slice(0,50));
-
-    const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': isIOS ? 'application/octet-stream' : 'application/json',
-        'X-Compressed': isIOS ? 'gzip-base64' : 'false'
-      },
-      body,
-    });
-
-    if (res.ok) {
-      surveyCompleted = true;
-    } else {
-      const errorText = await res.text();
-      console.error('Submission error:', res.status, errorText);
+      const pdfBase64 = await generatePDF(results);
+      const docxBase64 = await generateStrategiesDOCX(results);
+      const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
       
-      if (isIOS) {
-        alert(`Submission failed: ${res.status} ${res.statusText}. Please try again or contact support.`);
+      const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
+      const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+      const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+
+
+      await downloadFile(pdfBase64, pdfFilename);
+      await downloadFile(docxBase64, docxFilename);
+      await downloadFile(schoolDocxBase64, schoolDocxFilename);
+
+      let token = null;
+      if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
+        try {
+          token = await window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
+          console.log('Using reCAPTCHA v3 token:', token);
+        } catch (e) {
+          console.error('reCAPTCHA v3 execution failed:', e);
+        }
       }
-      
-      if (res.status === 403 && !recaptchaV2Passed) {
+
+      if (!token && window.recaptchaV2Token) {
+        token = window.recaptchaV2Token;
+        console.log('Using reCAPTCHA v2 token:', token);
+      }
+
+      if (!token) {
+        console.log('No reCAPTCHA token, showing v2');
         showRecaptchaV2 = true;
         loadRecaptchaV2();
+        isSubmitting = false;
+        return;
       }
-    }
-  } catch (error) {
-    console.error('Submission failed:', error);
-    
-    if (isIOS) {
-      alert(`Submission error: ${error.message}. Please try again or contact support.`);
-    }
-  } finally {
-    isSubmitting = false;
-  }
-}
 
-// Frontend helper
+      const payload = {
+        participantName: results.participantName,
+        childName: results.childName,
+        ageGroup: results.ageGroup,
+        pdfBase64,
+        pdfFilename,
+        docxBase64,
+        docxFilename,
+        schoolDocxBase64,
+        schoolDocxFilename,
+        email: 'addytwhite@icloud.com',
+        recaptchaToken: token
+      };
+
+      let body = JSON.stringify(payload);
+
+      if (isIOS) {
+        console.log("Compressing payload for iOS...");
+        const compressed = pako.gzip(body);
+        body = uint8ToBase64(compressed);
+      }
+
+      console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
+
+      const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': isIOS ? 'application/octet-stream' : 'application/json',
+          'X-Compressed': isIOS ? 'gzip-base64' : 'false'
+        },
+        body,
+      });
+
+      if (res.ok) {
+        surveyCompleted = true;
+      } else {
+        const errorText = await res.text();
+        console.error('Submission error:', res.status, errorText);
+        
+        if (isIOS) {
+          alert(`Submission failed: ${res.status} ${res.statusText}. Please try again or contact support.`);
+        }
+        
+        if (res.status === 403 && !recaptchaV2Passed) {
+          showRecaptchaV2 = true;
+          loadRecaptchaV2();
+        }
+      }
+    } catch (error) {
+      console.error('Submission failed:', error);
+      
+      if (isIOS) {
+        alert(`Submission error: ${error.message}. Please try again or contact support.`);
+      }
+    } finally {
+      isSubmitting = false;
+    }
+  }
+
+
+  function downloadFile(base64Data, filename) {
+    return new Promise((resolve) => {
+
+      const byteCharacters = atob(base64Data.split(',')[1]);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+      
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+
+      setTimeout(resolve, 100);
+    });
+  }
+
+
+
 function safeFileName(filename) {
   if (!filename || typeof filename !== 'string') return 'file.pdf';
 
@@ -473,199 +509,179 @@ function safeFileName(filename) {
     }
   }
 
-async function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = (e) => reject(e);
-    document.head.appendChild(s);
-  });
-}
+  async function generateStrategiesDOCX(results) {
+    try {
+      if (!window.htmlDocx) {
+        await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+      }
+      
+      const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
+      const significantResponses = results.responses.filter(
+        response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
+      );
 
-async function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
+      const strategySections = [];
 
-async function validateDocxBlob(blob, name = 'docx') {
-  // check type & signature
-  console.log(`${name} blob type:`, blob.type, 'size:', blob.size);
-  const arr = await blob.slice(0, 4).arrayBuffer();
-  const view = new Uint8Array(arr);
-  // ZIP files start with 0x50 0x4B 0x03 0x04
-  if (view[0] !== 0x50 || view[1] !== 0x4B) {
-    console.warn(`${name} does not start with PK (zip signature) — it may be corrupted`);
-    return false;
-  }
-  console.log(`${name} starts with PK — looks like a zip`);
-  return true;
-}
+      for (const response of significantResponses) {
+        const questionText = response.questionText.replace(/\?$/, '').trim();
+        let strategyKeys;
 
-async function maybeDownloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-}
+        if ((ageGroup === '4-8' && response.questionNum === 34) ||
+            (ageGroup === '9-12' && response.questionNum === 36)) {
 
-async function generateStrategiesDOCX(results) {
-  try {
-    if (!window.htmlDocx) {
-      await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
-      if (!window.htmlDocx) throw new Error('html-docx-js failed to load');
-    }
+          strategyKeys = [response.questionNum.toString()];
 
-    const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
-    const significantResponses = results.responses.filter(r => ['Sometimes', 'Often', 'Always'].includes(r.answer));
+          if (response.subAnswer) {
+            const optionNum = response.subAnswer.replace('Option', '').trim();
+            if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+            else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+            else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+          }
 
-    const strategySections = [];
+        } else {
+          strategyKeys = [response.questionNum.toString()];
+        }
 
-    for (const response of significantResponses) {
-      const questionText = response.questionText.replace(/\?$/, '').trim();
-      let strategyKeys = [response.questionNum.toString()];
+        for (const key of strategyKeys) {
+          const strategiesForKey = strategies.filter(
+            s => s.questionNum.toString() === key
+          );
 
-      if ((ageGroup === '4-8' && response.questionNum === 34) || (ageGroup === '9-12' && response.questionNum === 36)) {
-        strategyKeys = [response.questionNum.toString()];
-        if (response.subAnswer) {
-          const optionNum = response.subAnswer.replace('Option', '').trim();
-          if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-          else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-          else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+          if (strategiesForKey.length > 0) {
+            let customHeadingText = '';
+
+            if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+            else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+            else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+            else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+            else customHeadingText = `${key}. ${questionText}`;
+
+            const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+
+            strategySections.push(`
+              <div>
+                <h3>${customHeadingText}</h3>
+                <ul>${items}</ul>
+              </div>
+            `);
+          }
         }
       }
 
-      for (const key of strategyKeys) {
-        const strategiesForKey = strategies.filter(s => s.questionNum.toString() === key);
-        if (!strategiesForKey.length) continue;
-        let customHeadingText = '';
-        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
-        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
-        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
-        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
-        else customHeadingText = `${key}. ${questionText}`;
+      const htmlString = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { color: #530A7A; text-align: center; }
+              h3 { margin-top: 1.2em; color: #333; }
+              ul { margin: 0; padding-left: 1.2em; }
+              li { margin-bottom: 0.4em; }
+            </style>
+          </head>
+          <body>
+            <h1>CVI Strategies Report</h1>
+            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+            ${strategySections.join('')}
+          </body>
+        </html>
+      `;
 
-        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
-        strategySections.push(`<div><h3>${customHeadingText}</h3><ul>${items}</ul></div>`);
-      }
+      const converted = window.htmlDocx.asBlob(htmlString);
+      return await blobToBase64(converted);
+    } catch (error) {
+      console.error('DOCX generation failed:', error);
+      throw error;
     }
-
-    const htmlString = `<!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <style>
-            body { font-family: Arial, sans-serif; }
-            h1 { color: #530A7A; text-align: center; }
-            h3 { margin-top: 1.2em; color: #333; }
-            ul { margin: 0; padding-left: 1.2em; }
-            li { margin-bottom: 0.4em; }
-          </style>
-        </head>
-        <body>
-          <h1>CVI Strategies Report</h1>
-          <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-          <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-          ${strategySections.join('')}
-        </body>
-      </html>`;
-
-    const converted = window.htmlDocx.asBlob(htmlString);
-
-
-    const ok = await validateDocxBlob(converted, 'Strategies DOCX');
-    console.log('Strategies DOCX size bytes:', converted.size, 'type:', converted.type);
-    maybeDownloadBlob(converted, 'CVI-Strategies-test.docx');
-
-    const base64 = await blobToBase64(converted);
-    return base64;
-  } catch (err) {
-    console.error('DOCX generation failed:', err);
-    throw err;
   }
-}
 
-async function generateSchoolStrategiesDOCX(results) {
-  try {
-    if (!window.htmlDocx) {
-      await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
-      if (!window.htmlDocx) throw new Error('html-docx-js failed to load');
-    }
+  async function generateSchoolStrategiesDOCX(results) {
+    try {
+      if (!window.htmlDocx) {
+        await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+      }
+      
+      const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
+      const significantResponses = results.responses.filter(
+        response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
+      );
 
-    const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
-    const significantResponses = results.responses.filter(r => ['Sometimes', 'Often', 'Always'].includes(r.answer));
+      const strategySections = [];
 
-    const strategySections = [];
-    for (const response of significantResponses) {
-      const questionText = response.questionText.replace(/\?$/, '').trim();
-      let strategyKeys = [response.questionNum.toString()];
+      for (const response of significantResponses) {
+        const questionText = response.questionText.replace(/\?$/, '').trim();
+        let strategyKeys;
 
-      if ((ageGroup === '4-8' && response.questionNum === 34) || (ageGroup === '9-12' && response.questionNum === 36)) {
-        strategyKeys = [response.questionNum.toString()];
-        if (response.subAnswer) {
-          const optionNum = response.subAnswer.replace('Option', '').trim();
-          if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-          else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-          else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+        if ((ageGroup === '4-8' && response.questionNum === 34) ||
+            (ageGroup === '9-12' && response.questionNum === 36)) {
+
+          strategyKeys = [response.questionNum.toString()];
+
+          if (response.subAnswer) {
+            const optionNum = response.subAnswer.replace('Option', '').trim();
+            if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+            else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+            else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+          }
+
+        } else {
+          strategyKeys = [response.questionNum.toString()];
+        }
+
+        for (const key of strategyKeys) {
+          const strategiesForKey = strategies.filter(
+            s => s.questionNum.toString() === key
+          );
+
+          if (strategiesForKey.length > 0) {
+            let customHeadingText = '';
+
+            if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+            else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+            else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+            else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+            else customHeadingText = `${key}. ${questionText}`;
+
+            const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+
+            strategySections.push(`
+              <div>
+                <h3>${customHeadingText}</h3>
+                <ul>${items}</ul>
+              </div>
+            `);
+          }
         }
       }
 
-      for (const key of strategyKeys) {
-        const strategiesForKey = strategies.filter(s => s.questionNum.toString() === key);
-        if (!strategiesForKey.length) continue;
-        let customHeadingText = '';
-        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
-        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
-        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
-        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
-        else customHeadingText = `${key}. ${questionText}`;
+      const htmlString = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { color: #530A7A; text-align: center; }
+              h3 { margin-top: 1.2em; color: #333; }
+              ul { margin: 0; padding-left: 1.2em; }
+              li { margin-bottom: 0.4em; }
+            </style>
+          </head>
+          <body>
+            <h1>CVI Strategies Report (School)</h1>
+            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+            ${strategySections.join('')}
+          </body>
+        </html>
+      `;
 
-        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
-        strategySections.push(`<div><h3>${customHeadingText}</h3><ul>${items}</ul></div>`);
-      }
+      const converted = window.htmlDocx.asBlob(htmlString);
+      return await blobToBase64(converted);
+    } catch (error) {
+      console.error('School DOCX generation failed:', error);
+      throw error;
     }
-
-    const htmlString = `<!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <style>
-            body { font-family: Arial, sans-serif; }
-            h1 { color: #530A7A; text-align: center; }
-            h3 { margin-top: 1.2em; color: #333; }
-            ul { margin: 0; padding-left: 1.2em; }
-            li { margin-bottom: 0.4em; }
-          </style>
-        </head>
-        <body>
-          <h1>CVI Strategies Report (School)</h1>
-          <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-          <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-          ${strategySections.join('')}
-        </body>
-      </html>`;
-
-    const converted = window.htmlDocx.asBlob(htmlString);
-    const ok = await validateDocxBlob(converted, 'School DOCX');
-    console.log('School DOCX size bytes:', converted.size, 'type:', converted.type);
-    maybeDownloadBlob(converted, 'CVI-Strategies-School-test.docx');
-
-    return await blobToBase64(converted);
-  } catch (err) {
-    console.error('School DOCX generation failed:', err);
-    throw err;
   }
-}
-
 
   $: isForward = currentPage > previousPage;
 </script>
