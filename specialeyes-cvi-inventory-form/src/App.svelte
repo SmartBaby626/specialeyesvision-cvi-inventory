@@ -328,6 +328,9 @@ if (isIOS) {
 
 
     console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
+    console.log("PDF starts with:", pdfBase64.slice(0,50));
+    console.log("DOCX starts with:", docxBase64.slice(0,50));
+    console.log("School DOCX starts with:", schoolDocxBase64.slice(0,50));
 
     const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
       method: 'POST',
