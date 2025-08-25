@@ -475,7 +475,6 @@ function safeFileName(filename) {
     }
   }
 
-  // helper to load a script (you already have something like this)
 async function loadScript(src) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -511,7 +510,6 @@ async function validateDocxBlob(blob, name = 'docx') {
 }
 
 async function maybeDownloadBlob(blob, filename) {
-  // Use this to manually inspect the generated file
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -588,7 +586,7 @@ async function generateStrategiesDOCX(results) {
 
     const ok = await validateDocxBlob(converted, 'Strategies DOCX');
     console.log('Strategies DOCX size bytes:', converted.size, 'type:', converted.type);
-    // maybeDownloadBlob(converted, 'CVI-Strategies-test.docx');
+    maybeDownloadBlob(converted, 'CVI-Strategies-test.docx');
 
     const base64 = await blobToBase64(converted);
     return base64;
@@ -661,7 +659,7 @@ async function generateSchoolStrategiesDOCX(results) {
     const converted = window.htmlDocx.asBlob(htmlString);
     const ok = await validateDocxBlob(converted, 'School DOCX');
     console.log('School DOCX size bytes:', converted.size, 'type:', converted.type);
-    // maybeDownloadBlob(converted, 'CVI-Strategies-School-test.docx');
+    maybeDownloadBlob(converted, 'CVI-Strategies-School-test.docx');
 
     return await blobToBase64(converted);
   } catch (err) {
