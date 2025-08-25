@@ -273,9 +273,15 @@ function uint8ToBase64(uint8) {
       }))
     };
 
+    function stripBase64Prefix(str) {
+      const commaIndex = str.indexOf(',');
+      return commaIndex !== -1 ? str.slice(commaIndex + 1) : str;
+    }
+
     const pdfBase64 = await generatePDF(results);
-    const docxBase64 = await generateStrategiesDOCX(results);
-    const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+    const docxBase64 = stripBase64Prefix(await generateStrategiesDOCX(results));
+    const schoolDocxBase64 = stripBase64Prefix(await generateSchoolStrategiesDOCX(results));
+
     
     const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
     const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
@@ -317,6 +323,7 @@ function uint8ToBase64(uint8) {
       email: 'addytwhite@icloud.com',
       recaptchaToken: token
     };
+
 
     let body = JSON.stringify(payload);
 
