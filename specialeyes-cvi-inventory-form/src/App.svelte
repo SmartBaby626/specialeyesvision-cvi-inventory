@@ -6,8 +6,6 @@
   * TODO: Add email html
   * TODO: Make sure email is sent with correct data
   * TODO: Switch to mums email
-  * TODO: Fix weird NULL error on subquestion
-  * TODO: Fix filename error
   * TODO: Complete survey on mobile
   * TODO: Double check everything works
   * TODO: Neaten up code
@@ -142,19 +140,6 @@
       document.head.appendChild(directScript);
     });
   }
-
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) return resolve();
-      
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
   
   function getSubLabel(response) {
     if (!response.subAnswer) return '';
@@ -206,14 +191,6 @@
     handleDynamicSubmit();
   };
   
-  async function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
 
   function selectAge(group) {
     ageGroup = group;
@@ -273,9 +250,15 @@ function uint8ToBase64(uint8) {
       }))
     };
 
+    function stripBase64Prefix(str) {
+      const commaIndex = str.indexOf(',');
+      return commaIndex !== -1 ? str.slice(commaIndex + 1) : str;
+    }
+
     const pdfBase64 = await generatePDF(results);
-    const docxBase64 = await generateStrategiesDOCX(results);
-    const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+    const docxBase64 = stripBase64Prefix(await generateStrategiesDOCX(results));
+    const schoolDocxBase64 = stripBase64Prefix(await generateSchoolStrategiesDOCX(results));
+
     
     const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
     const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
@@ -318,6 +301,7 @@ function uint8ToBase64(uint8) {
       recaptchaToken: token
     };
 
+
     let body = JSON.stringify(payload);
 
 if (isIOS) {
@@ -325,9 +309,24 @@ if (isIOS) {
   const compressed = pako.gzip(body);
   body = uint8ToBase64(compressed);
 }
+function isValidDocx(base64Str) {
+  try {
+    const binary = atob(base64Str.startsWith("data:") ? base64Str.split(",")[1] : base64Str);
+    return binary.charCodeAt(0) === 0x50 && binary.charCodeAt(1) === 0x4B;
+  } catch (e) {
+    console.error("Docx base64 decode failed:", e);
+    return false;
+  }
+}
+
+console.log("DOCX valid zip?", isValidDocx(docxBase64));
+console.log("School DOCX valid zip?", isValidDocx(schoolDocxBase64));
 
 
     console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
+    console.log("PDF starts with:", pdfBase64.slice(0,50));
+    console.log("DOCX starts with:", docxBase64.slice(0,50));
+    console.log("School DOCX starts with:", schoolDocxBase64.slice(0,50));
 
     const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
       method: 'POST',
@@ -474,179 +473,199 @@ function safeFileName(filename) {
     }
   }
 
-  async function generateStrategiesDOCX(results) {
-    try {
-      if (!window.htmlDocx) {
-        await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
-      }
-      
-      const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
-      const significantResponses = results.responses.filter(
-        response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
-      );
+async function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = (e) => reject(e);
+    document.head.appendChild(s);
+  });
+}
 
-      const strategySections = [];
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 
-      for (const response of significantResponses) {
-        const questionText = response.questionText.replace(/\?$/, '').trim();
-        let strategyKeys;
-
-        if ((ageGroup === '4-8' && response.questionNum === 34) ||
-            (ageGroup === '9-12' && response.questionNum === 36)) {
-
-          strategyKeys = [response.questionNum.toString()];
-
-          if (response.subAnswer) {
-            const optionNum = response.subAnswer.replace('Option', '').trim();
-            if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-            else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-            else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
-          }
-
-        } else {
-          strategyKeys = [response.questionNum.toString()];
-        }
-
-        for (const key of strategyKeys) {
-          const strategiesForKey = strategies.filter(
-            s => s.questionNum.toString() === key
-          );
-
-          if (strategiesForKey.length > 0) {
-            let customHeadingText = '';
-
-            if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
-            else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
-            else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
-            else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
-            else customHeadingText = `${key}. ${questionText}`;
-
-            const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
-
-            strategySections.push(`
-              <div>
-                <h3>${customHeadingText}</h3>
-                <ul>${items}</ul>
-              </div>
-            `);
-          }
-        }
-      }
-
-      const htmlString = `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; }
-              h1 { color: #530A7A; text-align: center; }
-              h3 { margin-top: 1.2em; color: #333; }
-              ul { margin: 0; padding-left: 1.2em; }
-              li { margin-bottom: 0.4em; }
-            </style>
-          </head>
-          <body>
-            <h1>CVI Strategies Report</h1>
-            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-            ${strategySections.join('')}
-          </body>
-        </html>
-      `;
-
-      const converted = window.htmlDocx.asBlob(htmlString);
-      return await blobToBase64(converted);
-    } catch (error) {
-      console.error('DOCX generation failed:', error);
-      throw error;
-    }
+async function validateDocxBlob(blob, name = 'docx') {
+  // check type & signature
+  console.log(`${name} blob type:`, blob.type, 'size:', blob.size);
+  const arr = await blob.slice(0, 4).arrayBuffer();
+  const view = new Uint8Array(arr);
+  // ZIP files start with 0x50 0x4B 0x03 0x04
+  if (view[0] !== 0x50 || view[1] !== 0x4B) {
+    console.warn(`${name} does not start with PK (zip signature) — it may be corrupted`);
+    return false;
   }
+  console.log(`${name} starts with PK — looks like a zip`);
+  return true;
+}
 
-  async function generateSchoolStrategiesDOCX(results) {
-    try {
-      if (!window.htmlDocx) {
-        await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
-      }
-      
-      const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
-      const significantResponses = results.responses.filter(
-        response => ['Sometimes', 'Often', 'Always'].includes(response.answer)
-      );
+async function maybeDownloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
 
-      const strategySections = [];
-
-      for (const response of significantResponses) {
-        const questionText = response.questionText.replace(/\?$/, '').trim();
-        let strategyKeys;
-
-        if ((ageGroup === '4-8' && response.questionNum === 34) ||
-            (ageGroup === '9-12' && response.questionNum === 36)) {
-
-          strategyKeys = [response.questionNum.toString()];
-
-          if (response.subAnswer) {
-            const optionNum = response.subAnswer.replace('Option', '').trim();
-            if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
-            else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
-            else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
-          }
-
-        } else {
-          strategyKeys = [response.questionNum.toString()];
-        }
-
-        for (const key of strategyKeys) {
-          const strategiesForKey = strategies.filter(
-            s => s.questionNum.toString() === key
-          );
-
-          if (strategiesForKey.length > 0) {
-            let customHeadingText = '';
-
-            if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
-            else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
-            else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
-            else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
-            else customHeadingText = `${key}. ${questionText}`;
-
-            const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
-
-            strategySections.push(`
-              <div>
-                <h3>${customHeadingText}</h3>
-                <ul>${items}</ul>
-              </div>
-            `);
-          }
-        }
-      }
-
-      const htmlString = `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; }
-              h1 { color: #530A7A; text-align: center; }
-              h3 { margin-top: 1.2em; color: #333; }
-              ul { margin: 0; padding-left: 1.2em; }
-              li { margin-bottom: 0.4em; }
-            </style>
-          </head>
-          <body>
-            <h1>CVI Strategies Report (School)</h1>
-            <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
-            ${strategySections.join('')}
-          </body>
-        </html>
-      `;
-
-      const converted = window.htmlDocx.asBlob(htmlString);
-      return await blobToBase64(converted);
-    } catch (error) {
-      console.error('School DOCX generation failed:', error);
-      throw error;
+async function generateStrategiesDOCX(results) {
+  try {
+    if (!window.htmlDocx) {
+      await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+      if (!window.htmlDocx) throw new Error('html-docx-js failed to load');
     }
+
+    const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
+    const significantResponses = results.responses.filter(r => ['Sometimes', 'Often', 'Always'].includes(r.answer));
+
+    const strategySections = [];
+
+    for (const response of significantResponses) {
+      const questionText = response.questionText.replace(/\?$/, '').trim();
+      let strategyKeys = [response.questionNum.toString()];
+
+      if ((ageGroup === '4-8' && response.questionNum === 34) || (ageGroup === '9-12' && response.questionNum === 36)) {
+        strategyKeys = [response.questionNum.toString()];
+        if (response.subAnswer) {
+          const optionNum = response.subAnswer.replace('Option', '').trim();
+          if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+          else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+          else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+        }
+      }
+
+      for (const key of strategyKeys) {
+        const strategiesForKey = strategies.filter(s => s.questionNum.toString() === key);
+        if (!strategiesForKey.length) continue;
+        let customHeadingText = '';
+        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+        else customHeadingText = `${key}. ${questionText}`;
+
+        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+        strategySections.push(`<div><h3>${customHeadingText}</h3><ul>${items}</ul></div>`);
+      }
+    }
+
+    const htmlString = `<!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: Arial, sans-serif; }
+            h1 { color: #530A7A; text-align: center; }
+            h3 { margin-top: 1.2em; color: #333; }
+            ul { margin: 0; padding-left: 1.2em; }
+            li { margin-bottom: 0.4em; }
+          </style>
+        </head>
+        <body>
+          <h1>CVI Strategies Report</h1>
+          <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+          <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+          ${strategySections.join('')}
+        </body>
+      </html>`;
+
+    const converted = window.htmlDocx.asBlob(htmlString);
+
+
+    const ok = await validateDocxBlob(converted, 'Strategies DOCX');
+    console.log('Strategies DOCX size bytes:', converted.size, 'type:', converted.type);
+    maybeDownloadBlob(converted, 'CVI-Strategies-test.docx');
+
+    const base64 = await blobToBase64(converted);
+    return base64;
+  } catch (err) {
+    console.error('DOCX generation failed:', err);
+    throw err;
   }
+}
+
+async function generateSchoolStrategiesDOCX(results) {
+  try {
+    if (!window.htmlDocx) {
+      await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+      if (!window.htmlDocx) throw new Error('html-docx-js failed to load');
+    }
+
+    const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
+    const significantResponses = results.responses.filter(r => ['Sometimes', 'Often', 'Always'].includes(r.answer));
+
+    const strategySections = [];
+    for (const response of significantResponses) {
+      const questionText = response.questionText.replace(/\?$/, '').trim();
+      let strategyKeys = [response.questionNum.toString()];
+
+      if ((ageGroup === '4-8' && response.questionNum === 34) || (ageGroup === '9-12' && response.questionNum === 36)) {
+        strategyKeys = [response.questionNum.toString()];
+        if (response.subAnswer) {
+          const optionNum = response.subAnswer.replace('Option', '').trim();
+          if (optionNum === '1') strategyKeys.push(`${response.questionNum}1`);
+          else if (optionNum === '2') strategyKeys.push(`${response.questionNum}2`);
+          else if (optionNum === '3') strategyKeys.push(`${response.questionNum}1`, `${response.questionNum}2`);
+        }
+      }
+
+      for (const key of strategyKeys) {
+        const strategiesForKey = strategies.filter(s => s.questionNum.toString() === key);
+        if (!strategiesForKey.length) continue;
+        let customHeadingText = '';
+        if (key === '341') customHeadingText = '34a. Boundaries that are new to them';
+        else if (key === '342') customHeadingText = '34b. Boundaries that are well known to them';
+        else if (key === '361') customHeadingText = '36a. Boundaries that are new to them';
+        else if (key === '362') customHeadingText = '36b. Boundaries that are well known to them';
+        else customHeadingText = `${key}. ${questionText}`;
+
+        const items = strategiesForKey.map(s => `<li>${s.strategyText}</li>`).join('');
+        strategySections.push(`<div><h3>${customHeadingText}</h3><ul>${items}</ul></div>`);
+      }
+    }
+
+    const htmlString = `<!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: Arial, sans-serif; }
+            h1 { color: #530A7A; text-align: center; }
+            h3 { margin-top: 1.2em; color: #333; }
+            ul { margin: 0; padding-left: 1.2em; }
+            li { margin-bottom: 0.4em; }
+          </style>
+        </head>
+        <body>
+          <h1>CVI Strategies Report (School)</h1>
+          <p><strong>Age Group:</strong> ${results.ageGroup}</p>
+          <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+          ${strategySections.join('')}
+        </body>
+      </html>`;
+
+    const converted = window.htmlDocx.asBlob(htmlString);
+    const ok = await validateDocxBlob(converted, 'School DOCX');
+    console.log('School DOCX size bytes:', converted.size, 'type:', converted.type);
+    maybeDownloadBlob(converted, 'CVI-Strategies-School-test.docx');
+
+    return await blobToBase64(converted);
+  } catch (err) {
+    console.error('School DOCX generation failed:', err);
+    throw err;
+  }
+}
+
 
   $: isForward = currentPage > previousPage;
 </script>
