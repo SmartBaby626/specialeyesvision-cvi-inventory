@@ -256,7 +256,7 @@ function uint8ToBase64(uint8) {
 
    async function handleDynamicSubmit() {
     isSubmitting = true;
-    
+    console.log('isSubmitting should be true:', isSubmitting);
     try {
       const results = {
         ageGroup,
@@ -275,13 +275,15 @@ function uint8ToBase64(uint8) {
 
       const pdfBase64 = await generatePDF(results);
       const docxBase64 = await generateStrategiesDOCX(results);
+      console.loh('Generating home strategies DOCX... (base64)', docxBase64);
       const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
+      console.log('Generating school strategies DOCX... (base64)', schoolDocxBase64);
       
       const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
       const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
       const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-
-
+      console.log('Filenames:', { pdfFilename, docxFilename, schoolDocxFilename });
+      console.log('Downloading files...');
       await downloadFile(pdfBase64, pdfFilename);
       await downloadFile(docxBase64, docxFilename);
       await downloadFile(schoolDocxBase64, schoolDocxFilename);
@@ -322,6 +324,7 @@ function uint8ToBase64(uint8) {
         email: 'addytwhite@icloud.com',
         recaptchaToken: token
       };
+      console.log('Payload prepared:', payload);
 
       let body = JSON.stringify(payload);
 
@@ -513,6 +516,7 @@ function safeFileName(filename) {
     try {
       if (!window.htmlDocx) {
         await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+        console.log('html-docx-js loaded');
       }
       
       const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
@@ -587,7 +591,7 @@ function safeFileName(filename) {
           </body>
         </html>
       `;
-
+      console.log('Home strategies HTML:', htmlString);
       const converted = window.htmlDocx.asBlob(htmlString);
       return await blobToBase64(converted);
     } catch (error) {
@@ -600,6 +604,7 @@ function safeFileName(filename) {
     try {
       if (!window.htmlDocx) {
         await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
+        console.log('html-docx-js loaded');
       }
       
       const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
@@ -674,7 +679,7 @@ function safeFileName(filename) {
           </body>
         </html>
       `;
-
+      console.log('School strategies HTML:', htmlString);
       const converted = window.htmlDocx.asBlob(htmlString);
       return await blobToBase64(converted);
     } catch (error) {
