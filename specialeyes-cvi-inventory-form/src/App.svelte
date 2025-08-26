@@ -71,8 +71,6 @@
     isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
-    console.log('Running on iOS:', isIOS);
-    console.log('User Agent:', navigator.userAgent);
     
     document.addEventListener('click', loadRecaptcha, { once: true });
   });
@@ -114,7 +112,6 @@
   async function initializeRecaptcha() {
     return new Promise((resolve) => {
       window.grecaptcha.ready(() => {
-        console.log('reCAPTCHA ready');
         recaptchaLoaded = true;
         
         window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'survey' })
@@ -256,7 +253,6 @@ function uint8ToBase64(uint8) {
 
    async function handleDynamicSubmit() {
     isSubmitting = true;
-    console.log('isSubmitting should be true:', isSubmitting);
     try {
       const results = {
         ageGroup,
@@ -275,36 +271,25 @@ function uint8ToBase64(uint8) {
 
       const pdfBase64 = await generatePDF(results);
       const docxBase64 = await generateStrategiesDOCX(results);
-      console.log('Generating home strategies DOCX... (base64)', docxBase64);
       const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
-      console.log('Generating school strategies DOCX... (base64)', schoolDocxBase64);
       
       const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
       const docxFilename = safeFileName(`CVI-Strategies-Home-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
       const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-      console.log('Filenames:', { pdfFilename, docxFilename, schoolDocxFilename });
-      console.log('Downloading files...');
       await downloadFile(pdfBase64, pdfFilename);
       await downloadFile(docxBase64, docxFilename);
       await downloadFile(schoolDocxBase64, schoolDocxFilename);
 
       let token = null;
       if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
-        try {
           token = await window.grecaptcha.execute('6LdoDn8rAAAAAAKejpFmQdqT0A0p1C3IzPUlJ4iZ', { action: 'submit' });
-          console.log('Using reCAPTCHA v3 token:', token);
-        } catch (e) {
-          console.error('reCAPTCHA v3 execution failed:', e);
-        }
       }
 
       if (!token && window.recaptchaV2Token) {
         token = window.recaptchaV2Token;
-        console.log('Using reCAPTCHA v2 token:', token);
       }
 
       if (!token) {
-        console.log('No reCAPTCHA token, showing v2');
         showRecaptchaV2 = true;
         loadRecaptchaV2();
         isSubmitting = false;
@@ -324,17 +309,14 @@ function uint8ToBase64(uint8) {
         email: 'addytwhite@icloud.com',
         recaptchaToken: token
       };
-      console.log('Payload prepared:', payload);
 
       let body = JSON.stringify(payload);
 
       if (isIOS) {
-        console.log("Compressing payload for iOS...");
         const compressed = pako.gzip(body);
         body = uint8ToBase64(compressed);
       }
 
-      console.log("Payload size (KB):", (body.length / 1024).toFixed(2));
 
       const res = await fetch('https://nodejs-serverless-function-express-one-gold.vercel.app/api/sendEmail', {
         method: 'POST',
@@ -516,7 +498,6 @@ function safeFileName(filename) {
     try {
       if (!window.htmlDocx) {
         await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
-        console.log('html-docx-js loaded');
       }
       
       const strategies = ageGroup === '4-8' ? strategiesAtHome4_8 : strategiesAtHome9_12;
@@ -591,7 +572,6 @@ function safeFileName(filename) {
           </body>
         </html>
       `;
-      console.log('Home strategies HTML:', htmlString);
       const converted = window.htmlDocx.asBlob(htmlString);
       return await blobToBase64(converted);
     } catch (error) {
@@ -604,7 +584,6 @@ function safeFileName(filename) {
     try {
       if (!window.htmlDocx) {
         await loadScript('https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.min.js');
-        console.log('html-docx-js loaded');
       }
       
       const strategies = ageGroup === '4-8' ? strategiesAtSchool4_8 : strategiesAtSchool9_12;
@@ -679,7 +658,6 @@ function safeFileName(filename) {
           </body>
         </html>
       `;
-      console.log('School strategies HTML:', htmlString);
       const converted = window.htmlDocx.asBlob(htmlString);
       return await blobToBase64(converted);
     } catch (error) {
