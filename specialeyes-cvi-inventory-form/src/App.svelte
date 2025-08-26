@@ -275,7 +275,7 @@ function uint8ToBase64(uint8) {
 
       const pdfBase64 = await generatePDF(results);
       const docxBase64 = await generateStrategiesDOCX(results);
-      console.loh('Generating home strategies DOCX... (base64)', docxBase64);
+      console.log('Generating home strategies DOCX... (base64)', docxBase64);
       const schoolDocxBase64 = await generateSchoolStrategiesDOCX(results);
       console.log('Generating school strategies DOCX... (base64)', schoolDocxBase64);
       
