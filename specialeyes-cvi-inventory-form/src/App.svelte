@@ -280,7 +280,7 @@ function uint8ToBase64(uint8) {
       console.log('Generating school strategies DOCX... (base64)', schoolDocxBase64);
       
       const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
-      const docxFilename = safeFileName(`CVI-Strategies-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
+      const docxFilename = safeFileName(`CVI-Strategies-Home-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
       const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
       console.log('Filenames:', { pdfFilename, docxFilename, schoolDocxFilename });
       console.log('Downloading files...');
@@ -584,9 +584,9 @@ function safeFileName(filename) {
             </style>
           </head>
           <body>
-            <h1>CVI Strategies Report</h1>
+            <h1>CVI Strategies at Home</h1>
             <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
             ${strategySections.join('')}
           </body>
         </html>
@@ -672,9 +672,9 @@ function safeFileName(filename) {
             </style>
           </head>
           <body>
-            <h1>CVI Strategies Report (School)</h1>
+            <h1>CVI Strategies at School</h1>
             <p><strong>Age Group:</strong> ${results.ageGroup}</p>
-            <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
             ${strategySections.join('')}
           </body>
         </html>
