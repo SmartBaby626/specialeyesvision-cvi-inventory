@@ -303,7 +303,7 @@
         "subQuestion": "TRUE",
         "subQuestionOptNum": 3,
         "subQuestionOptText": "Boundaries that are new to them?/Boundaries that are well known to them?/Both",
-        "subQuestionText": "NULL"
+        "subQuestionText": "If so, are they familiar or new boundaries?"
     },
     {
         "DYC": "TRUE",
