@@ -3,10 +3,10 @@
    * // Fix subquestion handling to display results in results PDF
    * TODO: Reformat the results PDF to use likert scale
    * TODO: Remove DYC gap
-   * TODO: Add email html
-   * TODO: Make sure email is sent with correct data
+   * // Add email html
+   * // Make sure email is sent with correct data
    * TODO: Switch to mums email
-   * TODO: Fix weird NULL error on subquestion
+   * // Fix weird NULL error on subquestion
    * // Fix filename error
    * TODO: Complete survey on mobile
    * TODO: Double check everything works
