@@ -1,13 +1,13 @@
 <script>
   /**
-   * TODO: Fix subquestion handling to display results in results PDF
+   * // Fix subquestion handling to display results in results PDF
    * TODO: Reformat the results PDF to use likert scale
    * TODO: Remove DYC gap
    * TODO: Add email html
    * TODO: Make sure email is sent with correct data
    * TODO: Switch to mums email
    * TODO: Fix weird NULL error on subquestion
-   * TODO: Fix filename error
+   * // Fix filename error
    * TODO: Complete survey on mobile
    * TODO: Double check everything works
    * TODO: Neaten up code
