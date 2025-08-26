@@ -276,9 +276,6 @@ function uint8ToBase64(uint8) {
       const pdfFilename = safeFileName(`CVI-Inventory-Responses-${results.participantName}-${new Date().toISOString().slice(0,10)}.pdf`);
       const docxFilename = safeFileName(`CVI-Strategies-Home-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
       const schoolDocxFilename = safeFileName(`CVI-Strategies-School-${results.participantName}-${new Date().toISOString().slice(0,10)}.docx`);
-      await downloadFile(pdfBase64, pdfFilename);
-      await downloadFile(docxBase64, docxFilename);
-      await downloadFile(schoolDocxBase64, schoolDocxFilename);
 
       let token = null;
       if (recaptchaLoaded && window.grecaptcha && window.grecaptcha.execute) {
@@ -354,34 +351,6 @@ function uint8ToBase64(uint8) {
   }
 
 
-  function downloadFile(base64Data, filename) {
-    return new Promise((resolve) => {
-
-      const byteCharacters = atob(base64Data.split(',')[1]);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/octet-stream' });
-      
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      
-
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-
-      setTimeout(resolve, 100);
-    });
-  }
 
 
 
